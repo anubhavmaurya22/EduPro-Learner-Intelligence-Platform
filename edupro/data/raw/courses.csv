@@ -1,51 +1,401 @@
-CourseID,CourseCategory,CourseLevel,CourseRating,CoursePrice
-1,Design,Advanced,4.3,1841
-2,Design,Intermediate,3.4,4163
-3,Marketing,Advanced,4.8,715
-4,Business,Beginner,3.8,838
-5,Design,Intermediate,3.8,4562
-6,Business,Advanced,4.0,3208
-7,Design,Beginner,3.1,3652
-8,Tech,Intermediate,3.3,2250
-9,Design,Beginner,4.5,2921
-10,Tech,Intermediate,3.2,1209
-11,Design,Beginner,4.2,4226
-12,Marketing,Beginner,3.5,4142
-13,Tech,Advanced,3.8,4493
-14,Design,Beginner,3.6,988
-15,Marketing,Intermediate,3.7,546
-16,Tech,Intermediate,4.4,3859
-17,Marketing,Advanced,3.6,900
-18,Business,Intermediate,4.1,4490
-19,Business,Intermediate,4.0,3657
-20,Tech,Intermediate,4.3,4845
-21,Design,Beginner,4.9,890
-22,Tech,Beginner,4.5,4353
-23,Marketing,Intermediate,3.4,4930
-24,Design,Advanced,3.1,1128
-25,Business,Beginner,3.5,4732
-26,Design,Advanced,4.2,3430
-27,Business,Intermediate,3.1,2021
-28,Design,Intermediate,4.0,1326
-29,Design,Beginner,4.2,2000
-30,Design,Intermediate,3.7,3794
-31,Marketing,Beginner,4.5,2919
-32,Marketing,Intermediate,3.2,1434
-33,Tech,Intermediate,3.2,3542
-34,Tech,Beginner,4.5,4997
-35,Business,Beginner,4.0,1966
-36,Marketing,Beginner,4.4,4061
-37,Business,Intermediate,3.9,1114
-38,Tech,Intermediate,3.5,1682
-39,Business,Advanced,4.6,3723
-40,Tech,Beginner,4.6,3167
-41,Marketing,Intermediate,4.4,630
-42,Design,Intermediate,3.5,3483
-43,Marketing,Beginner,4.2,4778
-44,Business,Advanced,3.7,4959
-45,Business,Beginner,3.2,538
-46,Marketing,Advanced,4.8,4459
-47,Marketing,Intermediate,3.3,4087
-48,Tech,Advanced,4.9,1420
-49,Business,Intermediate,3.9,3269
-50,Business,Beginner,3.4,4611
+CourseID,CourseCategory,CourseType,CourseLevel,CourseRating
+C0001,Technology,Live,Intermediate,3.3
+C0002,Technology,Self-Paced,Advanced,3.4
+C0003,Business,Video,Intermediate,3.9
+C0004,Data Science,Video,Intermediate,3.6
+C0005,Business,Hybrid,Beginner,4.1
+C0006,Health & Wellness,Video,Intermediate,4.3
+C0007,Finance,Video,Intermediate,4.8
+C0008,Design,Video,Beginner,4.5
+C0009,Health & Wellness,Video,Intermediate,3.6
+C0010,Finance,Live,Beginner,3.9
+C0011,Business,Video,Advanced,3.8
+C0012,Technology,Self-Paced,Beginner,3.6
+C0013,Business,Hybrid,Advanced,3.5
+C0014,Marketing,Hybrid,Beginner,4.9
+C0015,Business,Hybrid,Intermediate,4.1
+C0016,Marketing,Self-Paced,Intermediate,4.0
+C0017,Technology,Video,Intermediate,4.3
+C0018,Marketing,Self-Paced,Beginner,4.4
+C0019,Finance,Hybrid,Intermediate,4.7
+C0020,Marketing,Hybrid,Intermediate,3.7
+C0021,Arts & Creativity,Live,Beginner,4.3
+C0022,Finance,Video,Beginner,3.6
+C0023,Health & Wellness,Live,Intermediate,4.0
+C0024,Arts & Creativity,Hybrid,Intermediate,4.1
+C0025,Finance,Video,Beginner,4.2
+C0026,Marketing,Hybrid,Beginner,4.2
+C0027,Technology,Video,Beginner,4.5
+C0028,Business,Video,Intermediate,3.8
+C0029,Design,Video,Intermediate,4.2
+C0030,Data Science,Video,Advanced,3.7
+C0031,Data Science,Live,Advanced,5.0
+C0032,Arts & Creativity,Video,Intermediate,3.6
+C0033,Health & Wellness,Self-Paced,Beginner,3.7
+C0034,Finance,Live,Beginner,4.5
+C0035,Business,Video,Beginner,3.9
+C0036,Technology,Hybrid,Advanced,4.5
+C0037,Technology,Self-Paced,Intermediate,4.2
+C0038,Data Science,Hybrid,Beginner,3.9
+C0039,Technology,Video,Beginner,3.7
+C0040,Technology,Self-Paced,Intermediate,3.7
+C0041,Health & Wellness,Hybrid,Intermediate,3.9
+C0042,Marketing,Video,Beginner,4.0
+C0043,Data Science,Video,Advanced,3.7
+C0044,Technology,Live,Intermediate,4.0
+C0045,Business,Video,Beginner,3.6
+C0046,Technology,Self-Paced,Advanced,4.5
+C0047,Arts & Creativity,Video,Beginner,4.6
+C0048,Business,Self-Paced,Advanced,3.7
+C0049,Business,Live,Advanced,3.7
+C0050,Data Science,Video,Intermediate,4.2
+C0051,Technology,Video,Intermediate,4.7
+C0052,Design,Live,Beginner,4.8
+C0053,Marketing,Hybrid,Advanced,3.4
+C0054,Marketing,Hybrid,Intermediate,4.6
+C0055,Technology,Video,Intermediate,4.1
+C0056,Design,Video,Advanced,4.1
+C0057,Design,Video,Advanced,4.4
+C0058,Health & Wellness,Hybrid,Advanced,3.9
+C0059,Data Science,Video,Beginner,4.6
+C0060,Data Science,Live,Advanced,4.8
+C0061,Design,Hybrid,Intermediate,4.8
+C0062,Design,Self-Paced,Advanced,3.2
+C0063,Business,Video,Intermediate,4.0
+C0064,Business,Video,Beginner,3.1
+C0065,Business,Hybrid,Beginner,3.7
+C0066,Health & Wellness,Hybrid,Intermediate,2.9
+C0067,Business,Video,Intermediate,4.3
+C0068,Arts & Creativity,Self-Paced,Beginner,4.2
+C0069,Business,Self-Paced,Intermediate,3.9
+C0070,Arts & Creativity,Video,Beginner,3.7
+C0071,Finance,Video,Advanced,4.3
+C0072,Data Science,Live,Intermediate,3.6
+C0073,Health & Wellness,Hybrid,Beginner,3.6
+C0074,Technology,Video,Beginner,3.5
+C0075,Health & Wellness,Hybrid,Beginner,4.0
+C0076,Design,Hybrid,Intermediate,3.8
+C0077,Technology,Video,Beginner,3.9
+C0078,Design,Hybrid,Beginner,4.4
+C0079,Arts & Creativity,Self-Paced,Advanced,4.6
+C0080,Technology,Video,Advanced,4.8
+C0081,Design,Video,Intermediate,4.1
+C0082,Marketing,Live,Advanced,4.3
+C0083,Finance,Self-Paced,Beginner,4.2
+C0084,Business,Self-Paced,Intermediate,3.3
+C0085,Technology,Live,Intermediate,3.9
+C0086,Technology,Hybrid,Intermediate,3.9
+C0087,Design,Live,Beginner,3.8
+C0088,Business,Live,Intermediate,4.1
+C0089,Arts & Creativity,Video,Beginner,4.0
+C0090,Technology,Video,Intermediate,3.6
+C0091,Marketing,Video,Beginner,4.0
+C0092,Technology,Live,Beginner,3.8
+C0093,Technology,Video,Beginner,2.8
+C0094,Business,Self-Paced,Beginner,3.4
+C0095,Business,Video,Intermediate,4.1
+C0096,Marketing,Video,Beginner,4.6
+C0097,Health & Wellness,Live,Advanced,2.9
+C0098,Design,Hybrid,Beginner,3.7
+C0099,Arts & Creativity,Video,Beginner,4.3
+C0100,Health & Wellness,Video,Intermediate,4.5
+C0101,Design,Self-Paced,Beginner,3.9
+C0102,Finance,Video,Intermediate,3.8
+C0103,Design,Video,Intermediate,4.7
+C0104,Technology,Self-Paced,Beginner,4.5
+C0105,Marketing,Video,Beginner,4.5
+C0106,Technology,Live,Beginner,3.9
+C0107,Design,Video,Beginner,4.7
+C0108,Marketing,Video,Beginner,3.1
+C0109,Technology,Video,Beginner,4.7
+C0110,Data Science,Video,Beginner,4.1
+C0111,Health & Wellness,Video,Intermediate,4.2
+C0112,Design,Video,Intermediate,3.6
+C0113,Data Science,Hybrid,Intermediate,3.2
+C0114,Marketing,Video,Beginner,4.2
+C0115,Design,Live,Beginner,4.4
+C0116,Business,Self-Paced,Advanced,4.5
+C0117,Arts & Creativity,Hybrid,Intermediate,4.4
+C0118,Marketing,Video,Advanced,4.3
+C0119,Data Science,Self-Paced,Beginner,3.6
+C0120,Finance,Video,Intermediate,4.5
+C0121,Health & Wellness,Video,Intermediate,3.6
+C0122,Technology,Hybrid,Beginner,4.7
+C0123,Technology,Live,Intermediate,4.1
+C0124,Technology,Live,Intermediate,4.1
+C0125,Marketing,Video,Beginner,4.5
+C0126,Design,Live,Beginner,4.6
+C0127,Design,Video,Intermediate,4.5
+C0128,Arts & Creativity,Self-Paced,Advanced,3.7
+C0129,Finance,Video,Beginner,4.5
+C0130,Technology,Self-Paced,Beginner,3.7
+C0131,Data Science,Live,Beginner,4.5
+C0132,Business,Self-Paced,Intermediate,3.4
+C0133,Data Science,Hybrid,Beginner,4.1
+C0134,Marketing,Hybrid,Advanced,3.7
+C0135,Health & Wellness,Video,Beginner,4.5
+C0136,Data Science,Video,Beginner,4.7
+C0137,Design,Video,Intermediate,4.2
+C0138,Finance,Self-Paced,Advanced,4.2
+C0139,Business,Self-Paced,Intermediate,4.5
+C0140,Technology,Live,Beginner,4.7
+C0141,Business,Video,Advanced,4.1
+C0142,Technology,Video,Beginner,3.9
+C0143,Arts & Creativity,Hybrid,Advanced,4.4
+C0144,Technology,Live,Beginner,3.2
+C0145,Business,Hybrid,Intermediate,4.6
+C0146,Business,Self-Paced,Intermediate,3.7
+C0147,Arts & Creativity,Video,Beginner,4.0
+C0148,Technology,Live,Advanced,4.6
+C0149,Technology,Live,Beginner,3.9
+C0150,Technology,Video,Beginner,4.4
+C0151,Technology,Video,Intermediate,4.7
+C0152,Technology,Video,Beginner,4.2
+C0153,Design,Self-Paced,Intermediate,4.3
+C0154,Technology,Live,Beginner,4.0
+C0155,Technology,Live,Beginner,4.2
+C0156,Finance,Self-Paced,Beginner,3.5
+C0157,Data Science,Hybrid,Beginner,4.0
+C0158,Data Science,Video,Intermediate,3.5
+C0159,Data Science,Live,Intermediate,3.7
+C0160,Arts & Creativity,Live,Advanced,3.1
+C0161,Technology,Hybrid,Advanced,4.2
+C0162,Health & Wellness,Hybrid,Beginner,4.9
+C0163,Finance,Hybrid,Beginner,3.9
+C0164,Technology,Video,Beginner,4.6
+C0165,Arts & Creativity,Self-Paced,Beginner,4.7
+C0166,Data Science,Video,Intermediate,3.5
+C0167,Technology,Video,Beginner,3.6
+C0168,Finance,Video,Beginner,4.6
+C0169,Marketing,Video,Advanced,4.1
+C0170,Design,Video,Intermediate,3.5
+C0171,Technology,Self-Paced,Beginner,3.8
+C0172,Business,Self-Paced,Beginner,4.3
+C0173,Finance,Video,Beginner,3.7
+C0174,Data Science,Video,Advanced,2.7
+C0175,Data Science,Video,Beginner,3.9
+C0176,Technology,Video,Beginner,4.0
+C0177,Technology,Video,Beginner,4.1
+C0178,Health & Wellness,Self-Paced,Intermediate,4.7
+C0179,Business,Video,Beginner,4.1
+C0180,Arts & Creativity,Live,Advanced,4.2
+C0181,Data Science,Video,Advanced,4.6
+C0182,Marketing,Self-Paced,Intermediate,4.1
+C0183,Data Science,Hybrid,Beginner,5.0
+C0184,Data Science,Self-Paced,Advanced,3.5
+C0185,Technology,Hybrid,Intermediate,3.6
+C0186,Data Science,Video,Beginner,4.4
+C0187,Business,Video,Intermediate,4.7
+C0188,Arts & Creativity,Hybrid,Beginner,4.0
+C0189,Marketing,Video,Beginner,3.6
+C0190,Technology,Live,Intermediate,5.0
+C0191,Technology,Video,Beginner,3.7
+C0192,Technology,Video,Intermediate,4.3
+C0193,Design,Live,Beginner,4.8
+C0194,Finance,Live,Advanced,3.9
+C0195,Arts & Creativity,Hybrid,Advanced,3.8
+C0196,Technology,Video,Advanced,3.8
+C0197,Business,Live,Beginner,4.6
+C0198,Business,Video,Beginner,4.6
+C0199,Marketing,Video,Intermediate,4.1
+C0200,Design,Live,Beginner,5.0
+C0201,Marketing,Video,Beginner,4.1
+C0202,Marketing,Video,Intermediate,4.7
+C0203,Technology,Video,Intermediate,3.9
+C0204,Finance,Video,Advanced,5.0
+C0205,Technology,Video,Beginner,4.9
+C0206,Marketing,Video,Beginner,4.0
+C0207,Business,Video,Beginner,4.8
+C0208,Business,Video,Advanced,4.8
+C0209,Health & Wellness,Hybrid,Intermediate,4.9
+C0210,Health & Wellness,Video,Advanced,2.9
+C0211,Finance,Video,Advanced,4.5
+C0212,Business,Video,Intermediate,4.4
+C0213,Marketing,Hybrid,Intermediate,4.3
+C0214,Business,Self-Paced,Beginner,4.2
+C0215,Health & Wellness,Hybrid,Intermediate,4.2
+C0216,Business,Hybrid,Intermediate,4.7
+C0217,Arts & Creativity,Live,Intermediate,4.4
+C0218,Arts & Creativity,Hybrid,Advanced,4.2
+C0219,Marketing,Live,Advanced,4.7
+C0220,Data Science,Video,Intermediate,4.3
+C0221,Technology,Video,Intermediate,4.4
+C0222,Health & Wellness,Video,Intermediate,5.0
+C0223,Technology,Self-Paced,Beginner,3.9
+C0224,Health & Wellness,Live,Beginner,3.3
+C0225,Business,Hybrid,Intermediate,4.1
+C0226,Business,Video,Intermediate,4.2
+C0227,Health & Wellness,Live,Beginner,4.5
+C0228,Design,Video,Advanced,4.2
+C0229,Design,Video,Beginner,4.5
+C0230,Design,Self-Paced,Beginner,5.0
+C0231,Data Science,Live,Intermediate,4.5
+C0232,Finance,Video,Beginner,4.6
+C0233,Data Science,Self-Paced,Beginner,4.0
+C0234,Arts & Creativity,Video,Beginner,3.4
+C0235,Health & Wellness,Self-Paced,Intermediate,3.0
+C0236,Data Science,Video,Beginner,3.8
+C0237,Marketing,Video,Intermediate,2.8
+C0238,Design,Video,Intermediate,4.4
+C0239,Data Science,Video,Beginner,3.9
+C0240,Arts & Creativity,Video,Advanced,3.4
+C0241,Technology,Hybrid,Beginner,4.2
+C0242,Data Science,Self-Paced,Advanced,3.7
+C0243,Business,Hybrid,Intermediate,4.3
+C0244,Business,Video,Advanced,4.5
+C0245,Design,Live,Beginner,3.7
+C0246,Finance,Video,Intermediate,4.0
+C0247,Design,Video,Beginner,4.2
+C0248,Design,Hybrid,Beginner,3.4
+C0249,Technology,Live,Intermediate,4.2
+C0250,Data Science,Video,Beginner,3.4
+C0251,Data Science,Video,Intermediate,4.4
+C0252,Data Science,Self-Paced,Beginner,3.9
+C0253,Design,Video,Beginner,3.4
+C0254,Technology,Live,Intermediate,3.8
+C0255,Data Science,Live,Beginner,3.8
+C0256,Data Science,Video,Intermediate,4.6
+C0257,Arts & Creativity,Video,Intermediate,4.2
+C0258,Arts & Creativity,Video,Advanced,3.6
+C0259,Design,Hybrid,Beginner,4.9
+C0260,Health & Wellness,Live,Intermediate,4.4
+C0261,Finance,Hybrid,Advanced,3.9
+C0262,Design,Self-Paced,Intermediate,3.3
+C0263,Technology,Hybrid,Intermediate,3.9
+C0264,Finance,Live,Intermediate,4.0
+C0265,Marketing,Live,Intermediate,4.3
+C0266,Design,Hybrid,Intermediate,4.4
+C0267,Finance,Hybrid,Beginner,4.5
+C0268,Business,Live,Beginner,3.3
+C0269,Marketing,Hybrid,Advanced,4.2
+C0270,Arts & Creativity,Video,Beginner,4.0
+C0271,Data Science,Live,Intermediate,5.0
+C0272,Marketing,Video,Beginner,4.1
+C0273,Business,Video,Intermediate,3.8
+C0274,Marketing,Video,Beginner,4.2
+C0275,Finance,Hybrid,Beginner,4.1
+C0276,Technology,Live,Advanced,3.1
+C0277,Design,Video,Advanced,4.3
+C0278,Data Science,Live,Intermediate,3.9
+C0279,Marketing,Live,Intermediate,4.1
+C0280,Business,Video,Intermediate,3.7
+C0281,Finance,Hybrid,Intermediate,3.6
+C0282,Technology,Hybrid,Intermediate,4.5
+C0283,Design,Hybrid,Beginner,4.7
+C0284,Data Science,Hybrid,Intermediate,4.3
+C0285,Health & Wellness,Live,Intermediate,3.2
+C0286,Health & Wellness,Video,Advanced,4.3
+C0287,Arts & Creativity,Video,Beginner,3.2
+C0288,Finance,Video,Intermediate,3.8
+C0289,Finance,Self-Paced,Intermediate,4.5
+C0290,Technology,Video,Beginner,4.4
+C0291,Data Science,Video,Beginner,4.3
+C0292,Business,Self-Paced,Beginner,4.8
+C0293,Finance,Self-Paced,Beginner,4.4
+C0294,Health & Wellness,Hybrid,Beginner,3.1
+C0295,Technology,Video,Intermediate,3.9
+C0296,Health & Wellness,Video,Intermediate,4.1
+C0297,Marketing,Video,Intermediate,4.0
+C0298,Design,Video,Advanced,3.8
+C0299,Technology,Video,Beginner,3.6
+C0300,Technology,Live,Beginner,5.0
+C0301,Design,Self-Paced,Intermediate,3.9
+C0302,Marketing,Video,Beginner,5.0
+C0303,Technology,Hybrid,Beginner,3.5
+C0304,Design,Hybrid,Beginner,4.4
+C0305,Health & Wellness,Video,Beginner,4.2
+C0306,Finance,Hybrid,Advanced,3.6
+C0307,Health & Wellness,Video,Beginner,3.9
+C0308,Data Science,Video,Intermediate,4.1
+C0309,Data Science,Hybrid,Beginner,3.7
+C0310,Marketing,Video,Intermediate,4.0
+C0311,Business,Self-Paced,Beginner,2.9
+C0312,Technology,Video,Intermediate,4.5
+C0313,Data Science,Live,Beginner,4.7
+C0314,Business,Live,Beginner,4.3
+C0315,Data Science,Video,Intermediate,5.0
+C0316,Data Science,Video,Beginner,4.4
+C0317,Data Science,Hybrid,Beginner,4.7
+C0318,Technology,Self-Paced,Beginner,4.7
+C0319,Design,Self-Paced,Advanced,2.7
+C0320,Design,Live,Beginner,4.3
+C0321,Marketing,Hybrid,Intermediate,3.4
+C0322,Technology,Hybrid,Beginner,3.5
+C0323,Data Science,Hybrid,Beginner,3.6
+C0324,Design,Live,Beginner,3.9
+C0325,Design,Hybrid,Advanced,4.4
+C0326,Business,Self-Paced,Beginner,4.3
+C0327,Data Science,Video,Beginner,4.1
+C0328,Health & Wellness,Self-Paced,Beginner,4.5
+C0329,Data Science,Live,Beginner,4.5
+C0330,Business,Video,Beginner,4.3
+C0331,Marketing,Video,Intermediate,3.2
+C0332,Business,Video,Beginner,3.7
+C0333,Data Science,Live,Beginner,4.1
+C0334,Business,Self-Paced,Intermediate,4.5
+C0335,Finance,Video,Beginner,3.4
+C0336,Data Science,Self-Paced,Beginner,4.1
+C0337,Technology,Self-Paced,Beginner,3.3
+C0338,Data Science,Video,Intermediate,4.6
+C0339,Finance,Self-Paced,Beginner,4.2
+C0340,Technology,Self-Paced,Intermediate,3.4
+C0341,Arts & Creativity,Hybrid,Beginner,3.4
+C0342,Business,Hybrid,Intermediate,4.3
+C0343,Arts & Creativity,Self-Paced,Beginner,4.8
+C0344,Arts & Creativity,Hybrid,Intermediate,3.6
+C0345,Business,Video,Advanced,4.5
+C0346,Technology,Self-Paced,Intermediate,3.8
+C0347,Technology,Hybrid,Beginner,4.5
+C0348,Data Science,Live,Beginner,4.4
+C0349,Marketing,Video,Beginner,4.2
+C0350,Data Science,Hybrid,Beginner,3.2
+C0351,Data Science,Video,Beginner,4.4
+C0352,Business,Self-Paced,Intermediate,4.4
+C0353,Health & Wellness,Video,Beginner,4.3
+C0354,Technology,Video,Beginner,4.2
+C0355,Technology,Live,Intermediate,3.7
+C0356,Technology,Video,Intermediate,4.6
+C0357,Health & Wellness,Hybrid,Beginner,4.5
+C0358,Design,Self-Paced,Advanced,3.6
+C0359,Data Science,Self-Paced,Beginner,4.8
+C0360,Technology,Video,Intermediate,4.2
+C0361,Data Science,Video,Intermediate,4.2
+C0362,Technology,Self-Paced,Intermediate,4.0
+C0363,Arts & Creativity,Self-Paced,Intermediate,4.1
+C0364,Finance,Live,Beginner,4.8
+C0365,Business,Live,Beginner,4.6
+C0366,Health & Wellness,Video,Intermediate,4.6
+C0367,Data Science,Self-Paced,Beginner,4.2
+C0368,Marketing,Hybrid,Advanced,4.5
+C0369,Health & Wellness,Video,Beginner,3.7
+C0370,Data Science,Video,Beginner,4.4
+C0371,Finance,Self-Paced,Beginner,4.0
+C0372,Data Science,Video,Beginner,3.1
+C0373,Data Science,Video,Intermediate,3.3
+C0374,Technology,Live,Intermediate,3.8
+C0375,Business,Video,Intermediate,4.3
+C0376,Marketing,Video,Advanced,3.8
+C0377,Arts & Creativity,Self-Paced,Advanced,3.8
+C0378,Design,Self-Paced,Advanced,4.5
+C0379,Health & Wellness,Self-Paced,Beginner,3.8
+C0380,Finance,Self-Paced,Intermediate,4.8
+C0381,Technology,Live,Beginner,4.7
+C0382,Business,Self-Paced,Beginner,4.1
+C0383,Technology,Video,Intermediate,4.5
+C0384,Marketing,Hybrid,Beginner,4.4
+C0385,Arts & Creativity,Self-Paced,Beginner,4.0
+C0386,Technology,Video,Beginner,4.5
+C0387,Marketing,Video,Beginner,4.6
+C0388,Design,Live,Advanced,3.6
+C0389,Design,Video,Beginner,4.2
+C0390,Data Science,Video,Beginner,4.2
+C0391,Data Science,Self-Paced,Beginner,4.5
+C0392,Technology,Self-Paced,Beginner,3.9
+C0393,Technology,Live,Advanced,3.8
+C0394,Technology,Video,Beginner,4.2
+C0395,Design,Video,Intermediate,4.7
+C0396,Technology,Self-Paced,Intermediate,3.5
+C0397,Health & Wellness,Live,Advanced,3.6
+C0398,Business,Video,Intermediate,3.8
+C0399,Marketing,Live,Advanced,3.9
+C0400,Business,Video,Beginner,3.2
