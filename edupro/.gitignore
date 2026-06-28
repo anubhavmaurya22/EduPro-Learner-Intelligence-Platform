@@ -8,3 +8,10 @@ __pycache__/
 .ipynb_checkpoints/
 ../edupro_env/
 edupro_env/
+edupro_env/
+.venv/
+__pycache__/
+edupro_env/
+.venv/
+__pycache__/
+*.pyc
