@@ -13,9 +13,10 @@ import pandas as pd
 import os
 from datetime import datetime, timedelta
 
-# ─────────────────────────────────────────────
-# SETTINGS — change these if needed
-# ─────────────────────────────────────────────
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+RAW_DIR    = SCRIPT_DIR  
+
+
 
 N_USERS    = 2000
 N_COURSES  = 400
@@ -84,7 +85,6 @@ print("\n[2/4] Generating courses...")
 # Category weights — Technology & Data Science more common
 cat_weights = [0.22, 0.18, 0.15, 0.10, 0.10, 0.10, 0.08, 0.07]
 
-# Level weights — more beginner than advanced
 lvl_weights = [0.45, 0.35, 0.20]
 
 courses = pd.DataFrame({
@@ -99,7 +99,6 @@ courses = pd.DataFrame({
     'CourseDuration': rng.integers(2, 40, N_COURSES),   # hours
 })
 
-# Price depends on level — advanced costs more
 price_range = {
     'Beginner'    : (29,  99),
     'Intermediate': (59, 149),
@@ -232,16 +231,16 @@ for k, v in pd.Series(user_archetype).value_counts().sort_index().items():
 
 print("\n[4/4] Saving files...")
 
-# Make sure output folder exists
-os.makedirs('data/raw', exist_ok=True)
+# Make sure output folder exists (RAW_DIR is already data/raw/)
+os.makedirs(RAW_DIR, exist_ok=True)
 
-users.to_csv('data/raw/users.csv',               index=False)
-courses.to_csv('data/raw/courses.csv',           index=False)
-transactions.to_csv('data/raw/transactions.csv', index=False)
+users.to_csv(os.path.join(RAW_DIR, 'users.csv'),               index=False)
+courses.to_csv(os.path.join(RAW_DIR, 'courses.csv'),           index=False)
+transactions.to_csv(os.path.join(RAW_DIR, 'transactions.csv'), index=False)
 
-print(f"   ✅ data/raw/users.csv        → {len(users):,} rows")
-print(f"   ✅ data/raw/courses.csv      → {len(courses):,} rows")
-print(f"   ✅ data/raw/transactions.csv → {len(transactions):,} rows")
+print(f"   ✅ {os.path.join(RAW_DIR, 'users.csv')}        → {len(users):,} rows")
+print(f"   ✅ {os.path.join(RAW_DIR, 'courses.csv')}      → {len(courses):,} rows")
+print(f"   ✅ {os.path.join(RAW_DIR, 'transactions.csv')} → {len(transactions):,} rows")
 
 
 # ─────────────────────────────────────────────
