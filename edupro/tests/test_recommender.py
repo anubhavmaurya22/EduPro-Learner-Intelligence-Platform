@@ -1,11 +1,5 @@
 
-"""
-EduPro Learner Intelligence Platform
-File: tests/test_recommender.py
 
-Tests for recommender.py
-Run with: pytest tests/test_recommender.py -v
-"""
 
 import sys
 import os

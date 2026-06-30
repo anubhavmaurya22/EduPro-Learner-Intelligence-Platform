@@ -1,12 +1,4 @@
 
-"""
-EduPro Learner Intelligence Platform
-File: tests/test_pipeline.py
-
-Tests for data_pipeline.py, features.py, clustering.py
-Run with: pytest tests/test_pipeline.py -v
-"""
-
 import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
