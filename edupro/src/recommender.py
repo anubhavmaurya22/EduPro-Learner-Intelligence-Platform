@@ -7,6 +7,8 @@ Combines cluster popularity, category match, level fit, and rating
 quality into a single weighted score per course.
 """
 
+import warnings
+
 import pandas as pd
 
 from .utils import (
@@ -186,6 +188,20 @@ def evaluate_recommendation_quality(profiles: pd.DataFrame,
             'AvgLvlMatch': recs['lvl_score'].mean(),
             'AvgPop':      recs['pop_score'].mean(),
         })
+
+    n_sampled  = len(sample_users)
+    n_covered  = len(rows)
+    coverage   = n_covered / n_sampled if n_sampled else 0.0
+
+    if coverage < 0.5:
+        warnings.warn(
+            f"evaluate_recommendation_quality: only {n_covered}/{n_sampled} "
+            f"sampled users ({coverage:.1%}) received non-empty recommendations. "
+            f"Quality metrics may be unreliable — check for over-restrictive "
+            f"filter_category/filter_level arguments or an empty candidate pool.",
+            UserWarning,
+            stacklevel=2,
+        )
 
     return pd.DataFrame(rows)
 

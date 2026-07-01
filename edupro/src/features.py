@@ -10,6 +10,8 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
+import warnings
+
 from .utils import CATEGORIES, LEVELS
 
 
@@ -80,8 +82,25 @@ def engineer_features(users: pd.DataFrame,
                 .merge(users[['UserID', 'Age', 'Gender']], on='UserID', how='left'))
 
     # ── Step 6: Derived features ─────────────
-    duration_days = (profiles['last_enroll'] - profiles['first_enroll']).dt.days + 1
+    # NOTE: .dt.days returns NaN for NaT timedeltas (e.g. timezone/dtype
+    # mismatch where first_enroll or last_enroll couldn't be parsed).
+    # We clamp to a minimum of 1 so single-transaction users get
+    # frequency = total_courses / 1 instead of NaN.  Any remaining NaNs
+    # (true parse failures) are caught by the warning below and zeroed in
+    # Step 8 — but they should be investigated if they appear in production.
+    raw_duration  = (profiles['last_enroll'] - profiles['first_enroll']).dt.days
+    duration_days = np.maximum(raw_duration.fillna(0), 0) + 1  # always >= 1
     profiles['enrollment_frequency']  = profiles['total_courses'] / duration_days
+
+    _nan_freq = profiles['enrollment_frequency'].isna().sum()
+    if _nan_freq:
+        warnings.warn(
+            f"enrollment_frequency has {_nan_freq} NaN value(s) after duration "
+            f"computation — likely caused by NaT in first_enroll/last_enroll. "
+            f"These will be filled with 0 in Step 8 and may distort clustering.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
     profiles['diversity_score']        = profiles['n_categories']
     profiles['category_concentration'] = 1 - (profiles['n_categories'] / len(CATEGORIES))
 

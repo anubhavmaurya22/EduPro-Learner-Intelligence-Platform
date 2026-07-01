@@ -32,14 +32,30 @@ def run_clustering(profiles: pd.DataFrame,
 
     Returns a dict with every artefact needed downstream
     (model, scaler, labels, PCA coords, diagnostics).
+
+    NOTE: n_clusters MUST equal 4.  SEGMENT_NAMES, SEGMENT_COLORS and
+    SEGMENT_DESC in utils.py are keyed 0-3 (4 business archetypes).  Passing
+    a different value causes _map_clusters_to_segments to collapse multiple
+    real clusters into segment 3 with no error — silent wrong output.  If you
+    want a different k, extend all three dicts in utils.py first, then update
+    _map_clusters_to_segments to match.
     """
+    if n_clusters != N_CLUSTERS:
+        raise NotImplementedError(
+            f"n_clusters={n_clusters} is not supported. "
+            f"SEGMENT_NAMES, SEGMENT_COLORS and SEGMENT_DESC in utils.py are "
+            f"keyed 0–{N_CLUSTERS - 1} (exactly {N_CLUSTERS} business archetypes). "
+            f"Extend all three dicts and update _map_clusters_to_segments before "
+            f"passing a different value."
+        )
+
     X = profiles[CLUSTERING_FEATURES].fillna(0).values
 
     scaler   = StandardScaler()
     X_scaled = scaler.fit_transform(X)
 
     # ── Elbow + Silhouette sweep ─────────────
-    k_range = range(2, 9)
+    k_range = range(2, 7)
     inertias, sil_scores = [], []
     for k in k_range:
         km = KMeans(n_clusters=k, random_state=seed, n_init=15)
@@ -96,13 +112,26 @@ def _map_clusters_to_segments(centers: pd.DataFrame) -> dict:
     Maps raw KMeans cluster indices to fixed segment IDs (0-3)
     using cluster-centre characteristics:
       0 = highest total_courses        -> Tech Explorer
-      2 = highest learning_depth_index -> Deep Specialist
       1 = highest avg_spending         -> Career Climber
+      2 = highest learning_depth_index -> Deep Specialist
       3 = whatever remains             -> Casual Browser
 
-    Guarantees every raw cluster index gets a mapping — fixes
-    the "NaN cluster" bug that happens if a manual dict misses one.
+    INVARIANT: len(centers) MUST equal 4 (i.e. n_clusters=4).
+    run_clustering() enforces this with a NotImplementedError before
+    calling this function, so callers outside that path should ensure
+    the same constraint holds.
+
+    Guarantees every raw cluster index gets a unique mapping — avoids
+    the "NaN cluster" bug that occurs when a manual dict omits an index.
     """
+    if len(centers) != 4:
+        raise ValueError(
+            f"_map_clusters_to_segments expects exactly 4 clusters "
+            f"(SEGMENT_NAMES/COLORS/DESC are hardcoded to keys 0-3), "
+            f"got {len(centers)}. Update utils.py's segment metadata "
+            f"before changing n_clusters."
+        )
+
     remaining = list(centers.index)
     mapping = {}
 

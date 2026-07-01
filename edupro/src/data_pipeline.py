@@ -88,8 +88,15 @@ def generate_data(n_users: int = N_USERS,
         mu, sd = enroll_dist[arch]
         n_enroll = max(1, int(rng.normal(mu, sd)))
 
-        chosen_cats = rng.choice(CATEGORIES, n_enroll, p=cat_pref[arch])
-        chosen_lvls = rng.choice(LEVELS, n_enroll, p=lvl_pref[arch])
+        # Over-sample by 3× so that after dedup we still have (roughly)
+        # n_enroll unique courses even in a small course pool.  Collisions
+        # are especially likely for high-activity archetypes (n~22) when
+        # n_courses=100, so generating extra candidates before dedup keeps
+        # total_courses and enrollment_frequency representative of the
+        # intended archetype, preserving cluster separability.
+        n_candidates = min(n_enroll * 3, len(courses))
+        chosen_cats = rng.choice(CATEGORIES, n_candidates, p=cat_pref[arch])
+        chosen_lvls = rng.choice(LEVELS,     n_candidates, p=lvl_pref[arch])
 
         chosen_ids = []
         for cat, lvl in zip(chosen_cats, chosen_lvls):
@@ -101,7 +108,9 @@ def generate_data(n_users: int = N_USERS,
                 pool = courses['CourseID'].values
             chosen_ids.append(rng.choice(pool))
 
-        chosen_ids = list(dict.fromkeys(chosen_ids))   # de-dupe, keep order
+        # De-dupe (preserving archetype-driven order), then truncate to
+        # the originally intended enrollment count.
+        chosen_ids = list(dict.fromkeys(chosen_ids))[:n_enroll]
 
         tx_days  = sorted(rng.integers(0, date_range_days, len(chosen_ids)))
         tx_dates = [start_date + timedelta(days=int(d)) for d in tx_days]

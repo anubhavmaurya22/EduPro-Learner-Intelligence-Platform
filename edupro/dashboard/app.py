@@ -1,4 +1,3 @@
-
 """
 EduPro Learner Intelligence Platform
 File: dashboard/app.py
@@ -89,13 +88,20 @@ PLOTLY_LAYOUT = dict(
     yaxis        =dict(gridcolor="#2a3350", zerolinecolor="#2a3350"),
 )
 
+# Helper: merge per-chart overrides into PLOTLY_LAYOUT without duplicate-kwarg errors.
+# Usage: fig.update_layout(**_layout(height=300, margin=dict(...), yaxis=dict(...)))
+def _layout(**overrides):
+    return {**PLOTLY_LAYOUT, **overrides}
+
+_MARGIN_TIGHT = dict(l=0, r=0, t=10, b=0)
+
 # ─────────────────────────────────────────────
 # LOAD DATA (cached)
 # ─────────────────────────────────────────────
 
 @st.cache_data(show_spinner=True)
 def load_all():
-    users, courses, transactions = generate_data()
+    users, courses, transactions = generate_data(n_users=500, n_courses=200)
     profiles = engineer_features(users, courses, transactions)
     cr = run_clustering(profiles)
     cp = get_cluster_profiles(profiles, cr)
@@ -420,12 +426,13 @@ elif page == "👤 Learner Explorer":
             cat_counts, x="Count", y="Category", orientation="h",
             color="Count", color_continuous_scale="Blues"
         )
-        fig_cat.update_layout(
-            **PLOTLY_LAYOUT, height=200,
+        fig_cat.update_layout(**_layout(
+            height=300,
             coloraxis_showscale=False,
-            margin=dict(l=0, r=0, t=10, b=0),
-            yaxis=dict(gridcolor="#2a3350", categoryorder="total ascending")
-        )
+            margin=_MARGIN_TIGHT,
+            yaxis=dict(gridcolor="#2a3350", zerolinecolor="#2a3350",
+                       categoryorder="total ascending")
+        ))
         st.plotly_chart(fig_cat, use_container_width=True)
 
         lvl_c = user_tx["CourseLevel"].value_counts().reset_index()
@@ -434,7 +441,7 @@ elif page == "👤 Learner Explorer":
             lvl_c, values="Count", names="Level", hole=0.5,
             color_discrete_sequence=["#4cc9f0", "#4361ee", "#7209b7"]
         )
-        fig_lvl.update_layout(**PLOTLY_LAYOUT, height=200, margin=dict(l=0, r=0, t=10, b=0))
+        fig_lvl.update_layout(**_layout(height=200, margin=_MARGIN_TIGHT))
         fig_lvl.update_traces(textinfo="percent+label", textfont_size=10)
         st.plotly_chart(fig_lvl, use_container_width=True)
 
@@ -457,10 +464,15 @@ elif page == "👤 Learner Explorer":
 
     # ── Course Table ──────────────────────────
     st.markdown("<p class='section-title'>Enrolled Courses</p>", unsafe_allow_html=True)
+    # NOTE: previously this merged against the GLOBAL transactions table
+    # deduped by CourseID only — if two different users bought the same
+    # course, drop_duplicates() could keep the other user's Amount/Date.
+    # user_tx2 (already filtered to this uid) has the correct Amount +
+    # TransactionDate directly, so merge onto that instead.
     course_tbl = (
         user_tx
-        .merge(transactions[["CourseID", "Amount", "TransactionDate"]]
-               .drop_duplicates("CourseID"), on="CourseID")
+        .merge(user_tx2[["CourseID", "Amount", "TransactionDate"]],
+               on="CourseID", how="left")
         [["CourseID", "CourseCategory", "CourseLevel", "TransactionDate", "Amount"]]
         .sort_values("TransactionDate", ascending=False)
         .reset_index(drop=True)
@@ -473,21 +485,259 @@ elif page == "👤 Learner Explorer":
 
 
 # ═══════════════════════════════════════════════
-# PAGES 3-6 PLACEHOLDER (Day 7)
+# PAGE 3 — RECOMMENDATIONS
 # ═══════════════════════════════════════════════
 
 elif page == "🔮 Recommendations":
     st.markdown("<h1 style='color:#e8edf5'>🔮 Recommendations</h1>", unsafe_allow_html=True)
-    st.info("Coming Day 7 — Recommendation engine page")
+    st.markdown("<p style='color:#8fa3bf;margin-bottom:20px'>Personalized course recommendations, existing learner or cold-start</p>", unsafe_allow_html=True)
+
+    mode = st.radio("Mode", ["Existing Learner", "New Learner (Cold Start)"], horizontal=True)
+
+    if mode == "Existing Learner":
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            uid = st.selectbox("Select Learner", profiles["UserID"].tolist())
+        with c2:
+            fcat = st.selectbox("Filter Category", ["All"] + CATEGORIES)
+        with c3:
+            flvl = st.selectbox("Filter Level", ["All"] + LEVELS)
+
+        recs = recommend_courses(uid, profiles, courses, transactions,
+                                  top_n=8, filter_category=fcat, filter_level=flvl)
+
+        if recs.empty:
+            st.warning("No recommendations found — try loosening the filters.")
+        else:
+            seg = recs["Segment"].iloc[0]
+            color = SEGMENT_COLORS[int(profiles.loc[profiles["UserID"] == uid, "Cluster"].iloc[0])]
+            st.markdown(f"""
+            <div class='seg-card' style='border-color:{color}'>
+                <h3 style='color:{color}'>{uid} · {seg}</h3>
+                <p>Target level: <b style='color:#e8edf5'>{recs["TargetLevel"].iloc[0]}</b></p>
+            </div>""", unsafe_allow_html=True)
+
+            for _, r in recs.iterrows():
+                st.markdown(f"""
+                <div class='course-card'>
+                    <div style='display:flex;justify-content:space-between;align-items:center'>
+                        <div>
+                            <b style='color:#e8edf5;font-size:1.0rem'>#{r["Rank"]} · {r["CourseID"]}</b>
+                            <span style='color:#8fa3bf;font-size:0.82rem'> — {r["CourseCategory"]} · {r["CourseLevel"]} · {r["CourseType"]}</span>
+                        </div>
+                        <div style='text-align:right'>
+                            <span style='color:#4cc9f0;font-weight:700'>{r["RecommendationScore"]:.2f}</span>
+                            <span style='color:#8fa3bf;font-size:0.78rem'> score</span><br>
+                            <span style='color:#f72585'>{r["CourseRating"]}★</span>
+                        </div>
+                    </div>
+                    <p style='margin-top:8px;color:#c8d6e8;font-size:0.82rem'>{r["MatchReason"]}</p>
+                </div>""", unsafe_allow_html=True)
+
+    else:
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            goal = st.selectbox("Learning Goal", ["Career", "Skill", "Hobby"])
+        with c2:
+            cat = st.selectbox("Interest Category", CATEGORIES)
+        with c3:
+            lvl = st.selectbox("Starting Level", LEVELS)
+
+        if st.button("Get Recommendations", type="primary"):
+            cold = recommend_new_user(courses, goal=goal, category=cat, level=lvl, top_n=8)
+            if cold.empty:
+                st.warning("No matching courses found.")
+            else:
+                for _, r in cold.iterrows():
+                    st.markdown(f"""
+                    <div class='course-card'>
+                        <b style='color:#e8edf5'>#{r["Rank"]} · {r["CourseID"]}</b>
+                        <span style='color:#8fa3bf;font-size:0.82rem'> — {r["CourseCategory"]} · {r["CourseLevel"]} · {r["CourseType"]}</span>
+                        <span style='float:right;color:#f72585'>{r["CourseRating"]}★</span>
+                        <p style='margin-top:6px;color:#c8d6e8;font-size:0.82rem'>{r["MatchReason"]}</p>
+                    </div>""", unsafe_allow_html=True)
 
 elif page == "🔵 Cluster Map":
     st.markdown("<h1 style='color:#e8edf5'>🔵 Cluster Map</h1>", unsafe_allow_html=True)
-    st.info("Coming Day 7 — PCA scatter, elbow curves, silhouette plot")
+    st.markdown("<p style='color:#8fa3bf;margin-bottom:20px'>PCA projection, elbow curve, and silhouette diagnostics</p>", unsafe_allow_html=True)
+
+    col_a, col_b = st.columns([2, 1])
+
+    with col_a:
+        st.markdown("<p class='section-title'>PCA Projection (2D)</p>", unsafe_allow_html=True)
+        color_map = {v: SEGMENT_COLORS[k] for k, v in SEGMENT_NAMES.items()}
+        fig_pca = px.scatter(
+            profiles, x="PCA_1", y="PCA_2",
+            color="SegmentName", color_discrete_map=color_map,
+            opacity=0.65, hover_data=["UserID", "total_courses", "avg_spending"]
+        )
+        fig_pca.update_traces(marker=dict(size=6))
+        fig_pca.update_layout(**PLOTLY_LAYOUT, height=460)
+        st.plotly_chart(fig_pca, use_container_width=True)
+
+    with col_b:
+        st.markdown("<p class='section-title'>Cluster Diagnostics</p>", unsafe_allow_html=True)
+        st.metric("Overall Silhouette Score", f"{cr['overall_silhouette']:.3f}")
+        st.metric("Clusters (K)", N_CLUSTERS)
+        expl_var = cr["pca"].explained_variance_ratio_
+        st.metric("PCA Variance Explained", f"{expl_var.sum()*100:.1f}%")
+        st.caption(f"PC1: {expl_var[0]*100:.1f}% · PC2: {expl_var[1]*100:.1f}%")
+
+    st.markdown("---")
+    col_c, col_d = st.columns(2)
+
+    with col_c:
+        st.markdown("<p class='section-title'>Elbow Method (Inertia)</p>", unsafe_allow_html=True)
+        fig_elbow = go.Figure()
+        fig_elbow.add_trace(go.Scatter(
+            x=cr["k_range"], y=cr["inertias"],
+            mode="lines+markers", line=dict(color="#4361ee", width=2.5),
+            marker=dict(size=8)
+        ))
+        fig_elbow.add_vline(x=N_CLUSTERS, line_dash="dot", line_color="#f72585")
+        fig_elbow.update_layout(
+            **PLOTLY_LAYOUT, height=320,
+            xaxis_title="K", yaxis_title="Inertia"
+        )
+        st.plotly_chart(fig_elbow, use_container_width=True)
+
+    with col_d:
+        st.markdown("<p class='section-title'>Silhouette Score by K</p>", unsafe_allow_html=True)
+        fig_sil = go.Figure()
+        fig_sil.add_trace(go.Scatter(
+            x=cr["k_range"], y=cr["sil_scores"],
+            mode="lines+markers", line=dict(color="#4cc9f0", width=2.5),
+            marker=dict(size=8)
+        ))
+        fig_sil.add_vline(x=N_CLUSTERS, line_dash="dot", line_color="#f72585")
+        fig_sil.update_layout(
+            **PLOTLY_LAYOUT, height=320,
+            xaxis_title="K", yaxis_title="Silhouette Score"
+        )
+        st.plotly_chart(fig_sil, use_container_width=True)
+
+    st.markdown("---")
+    st.markdown("<p class='section-title'>Per-Learner Silhouette Distribution</p>", unsafe_allow_html=True)
+    fig_sd = px.histogram(
+        profiles, x="SilhouetteVal", color="SegmentName",
+        color_discrete_map=color_map, nbins=40, opacity=0.75,
+        barmode="overlay"
+    )
+    fig_sd.add_vline(x=0, line_dash="dot", line_color="#8fa3bf")
+    fig_sd.update_layout(**PLOTLY_LAYOUT, height=300)
+    st.plotly_chart(fig_sd, use_container_width=True)
+    st.caption("Values near 0 or negative indicate learners sitting between segments — worth a closer look.")
 
 elif page == "📈 Segment Insights":
     st.markdown("<h1 style='color:#e8edf5'>📈 Segment Insights</h1>", unsafe_allow_html=True)
-    st.info("Coming Day 7 — Feature heatmap, spending analysis")
+    st.markdown("<p style='color:#8fa3bf;margin-bottom:20px'>Feature comparison and spending analysis across segments</p>", unsafe_allow_html=True)
+
+    st.markdown("<p class='section-title'>Segment Feature Heatmap</p>", unsafe_allow_html=True)
+    heat_feats = ['total_courses', 'avg_spending', 'total_spending', 'avg_course_rating',
+                  'diversity_score', 'learning_depth_index', 'beginner_ratio',
+                  'advanced_ratio', 'enrollment_frequency', 'n_categories', 'recency_days']
+    heat_df = cp.set_index("SegmentName")[heat_feats]
+    heat_norm = (heat_df - heat_df.min()) / (heat_df.max() - heat_df.min() + 1e-9)
+
+    fig_heat = px.imshow(
+        heat_norm.T, aspect="auto", color_continuous_scale="Blues",
+        labels=dict(color="Normalized"),
+    )
+    fig_heat.update_layout(**PLOTLY_LAYOUT, height=420)
+    st.plotly_chart(fig_heat, use_container_width=True)
+    st.caption("Values normalized 0-1 per feature (row) across segments for comparability.")
+
+    st.markdown("---")
+    col_a, col_b = st.columns(2)
+
+    with col_a:
+        st.markdown("<p class='section-title'>Spending by Segment</p>", unsafe_allow_html=True)
+        color_map = {v: SEGMENT_COLORS[k] for k, v in SEGMENT_NAMES.items()}
+        fig_spend = px.box(
+            profiles, x="SegmentName", y="total_spending",
+            color="SegmentName", color_discrete_map=color_map, points=False
+        )
+        fig_spend.update_layout(**PLOTLY_LAYOUT, height=340, showlegend=False)
+        st.plotly_chart(fig_spend, use_container_width=True)
+
+    with col_b:
+        st.markdown("<p class='section-title'>Learning Depth by Segment</p>", unsafe_allow_html=True)
+        fig_depth = px.box(
+            profiles, x="SegmentName", y="learning_depth_index",
+            color="SegmentName", color_discrete_map=color_map, points=False
+        )
+        fig_depth.update_layout(**PLOTLY_LAYOUT, height=340, showlegend=False)
+        st.plotly_chart(fig_depth, use_container_width=True)
+
+    st.markdown("---")
+    st.markdown("<p class='section-title'>Segment Summary Table</p>", unsafe_allow_html=True)
+    display_cols = ['SegmentName', 'n_users', 'total_courses', 'avg_spending',
+                     'avg_course_rating', 'learning_depth_index',
+                     'top_preferred_category', 'top_preferred_level', 'SilhouetteVal']
+    st.dataframe(
+        cp[display_cols].sort_values("n_users", ascending=False)
+          .style.format({
+              'total_courses': '{:.1f}', 'avg_spending': '${:.2f}',
+              'avg_course_rating': '{:.2f}★', 'learning_depth_index': '{:.2f}',
+              'SilhouetteVal': '{:.3f}'
+          }),
+        use_container_width=True
+    )
 
 elif page == "🔍 EDA & Analytics":
     st.markdown("<h1 style='color:#e8edf5'>🔍 EDA & Analytics</h1>", unsafe_allow_html=True)
-    st.info("Coming Day 7 — Correlation matrix, business insights")
+    st.markdown("<p style='color:#8fa3bf;margin-bottom:20px'>Correlation structure and platform-wide business insights</p>", unsafe_allow_html=True)
+
+    st.markdown("<p class='section-title'>Feature Correlation Matrix</p>", unsafe_allow_html=True)
+    corr_feats = CLUSTERING_FEATURES
+    corr = profiles[corr_feats].corr()
+    fig_corr = px.imshow(
+        corr, aspect="auto", color_continuous_scale="RdBu_r", zmin=-1, zmax=1,
+        text_auto=".2f"
+    )
+    fig_corr.update_layout(**PLOTLY_LAYOUT, height=520)
+    fig_corr.update_traces(textfont_size=9)
+    st.plotly_chart(fig_corr, use_container_width=True)
+
+    st.markdown("---")
+    col_a, col_b = st.columns(2)
+
+    with col_a:
+        st.markdown("<p class='section-title'>Spending vs. Course Volume</p>", unsafe_allow_html=True)
+        color_map = {v: SEGMENT_COLORS[k] for k, v in SEGMENT_NAMES.items()}
+        fig_scat = px.scatter(
+            profiles, x="total_courses", y="total_spending",
+            color="SegmentName", color_discrete_map=color_map,
+            opacity=0.6, hover_data=["UserID"]
+        )
+        fig_scat.update_layout(**PLOTLY_LAYOUT, height=360)
+        st.plotly_chart(fig_scat, use_container_width=True)
+
+    with col_b:
+        st.markdown("<p class='section-title'>Rating Distribution</p>", unsafe_allow_html=True)
+        fig_rate = px.histogram(
+            courses, x="CourseRating", nbins=25,
+            color_discrete_sequence=["#4361ee"]
+        )
+        fig_rate.update_layout(**PLOTLY_LAYOUT, height=360)
+        st.plotly_chart(fig_rate, use_container_width=True)
+
+    st.markdown("---")
+    st.markdown("<p class='section-title'>Key Business Insights</p>", unsafe_allow_html=True)
+
+    top_seg = cp.loc[cp["n_users"].idxmax(), "SegmentName"]
+    top_spend_seg = cp.loc[cp["avg_spending"].idxmax(), "SegmentName"]
+    top_cat = courses["CourseCategory"].value_counts().idxmax() if "CourseCategory" in courses else None
+    low_sil_pct = (profiles["SilhouetteVal"] < 0.1).mean() * 100
+
+    insights = [
+        f"🏆 <b>{top_seg}</b> is the largest segment by learner count — the core of the platform's user base.",
+        f"💰 <b>{top_spend_seg}</b> spends the most per course on average — the highest-value segment to retain.",
+        f"⚠️ <b>{low_sil_pct:.1f}%</b> of learners have a silhouette score below 0.1, meaning segment boundaries are fuzzy for them — good candidates for manual review before targeted campaigns.",
+        f"📊 Overall clustering quality (silhouette): <b>{cr['overall_silhouette']:.3f}</b> — "
+        + ("solid, well-separated segments." if cr['overall_silhouette'] > 0.25
+           else "moderate separation — consider revisiting features or K." if cr['overall_silhouette'] > 0.1
+           else "weak separation — segments overlap significantly."),
+    ]
+    for ins in insights:
+        st.markdown(f"<div class='insight-box'>{ins}</div>", unsafe_allow_html=True)
