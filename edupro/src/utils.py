@@ -1,37 +1,47 @@
+
 """
 EduPro Learner Intelligence Platform
 File: src/utils.py
-
-Shared constants and small helper functions used across
-data_pipeline.py, features.py, clustering.py, recommender.py
+Context: edupro-online.com — CPD platform for pediatric professionals
 """
 
 import numpy as np
 
 # ─────────────────────────────────────────────
-# CATEGORICAL CONSTANTS
+# EDUPRO-SPECIFIC CONSTANTS
 # ─────────────────────────────────────────────
 
 CATEGORIES = [
-    'Technology', 'Data Science', 'Business',
-    'Design', 'Marketing', 'Finance',
-    'Health & Wellness', 'Arts & Creativity'
+    'DCD & Motor Disorders',
+    'Fundamental Movement Skills',
+    'Classroom Interventions',
+    'Sensory Processing',
+    'Sport & Leisure',
+    'Assessment & Diagnosis'
 ]
 
-LEVELS       = ['Beginner', 'Intermediate', 'Advanced']
-COURSE_TYPES = ['Video', 'Live', 'Hybrid', 'Self-Paced']
-GENDERS      = ['Male', 'Female', 'Non-Binary']
+LEVELS            = ['Beginner', 'Intermediate', 'Advanced']
+COURSE_TYPES      = ['Webinar', 'Self-Paced Video', 'Live Workshop', 'Mini Course']
+GENDERS           = ['Female', 'Male', 'Non-Binary']
 
+PROFESSION_TYPES = [
+    'Occupational Therapist',
+    'Physiotherapist',
+    'Kinderkineticist',
+    'Classroom Teacher',
+    'School Psychologist',
+    'Parent/Caregiver'
+]
 
 # ─────────────────────────────────────────────
-# SEGMENT METADATA
+# SEGMENT METADATA — EdUPro Professional Names
 # ─────────────────────────────────────────────
 
 SEGMENT_NAMES = {
-    0: '🔭 Tech Explorer',
-    1: '🚀 Career Climber',
-    2: '📚 Deep Specialist',
-    3: '🌿 Casual Browser'
+    0: '🎓 Eager Learners',
+    1: '📜 CPD Collectors',
+    2: '🔬 Clinical Experts',
+    3: '👀 Curious Browsers'
 }
 
 SEGMENT_COLORS = {
@@ -42,22 +52,29 @@ SEGMENT_COLORS = {
 }
 
 SEGMENT_DESC = {
-    0: 'Diverse beginner-to-intermediate learners, heavy in Technology & Data Science, high course volume.',
-    1: 'Career-driven, certificate-seekers across Business, Finance & Tech. High spenders.',
-    2: 'Deep focus in 1–2 domains at Advanced level. Highest spend-per-course.',
-    3: 'Low-engagement browsers with minimal spending and diverse but shallow interest.'
+    0: 'Newly qualified professionals exploring many CPD areas. High course volume, beginner-intermediate level.',
+    1: 'Mid-career professionals actively accumulating HPCSA/SAPIK accreditation points across specialties.',
+    2: 'Veteran therapists going deep into specific disorders. Advanced level. Highest spend-per-course.',
+    3: 'Teachers, parents and allied professionals occasionally exploring EdUPro content. Re-activation opportunity.'
 }
-
 
 # ─────────────────────────────────────────────
 # ML CONSTANTS
 # ─────────────────────────────────────────────
 
 CLUSTERING_FEATURES = [
-    'total_courses', 'avg_spending', 'avg_course_rating',
-    'diversity_score', 'learning_depth_index', 'beginner_ratio',
-    'enrollment_frequency', 'category_concentration', 'n_categories',
-    'recency_days', 'preferred_category_enc', 'preferred_level_enc'
+    'total_courses',
+    'avg_spending',
+    'avg_course_rating',
+    'diversity_score',
+    'learning_depth_index',
+    'beginner_ratio',
+    'enrollment_frequency',
+    'category_concentration',
+    'n_categories',
+    'recency_days',
+    'preferred_category_enc',
+    'preferred_level_enc'
 ]
 
 N_USERS     = 2000
@@ -65,7 +82,6 @@ N_COURSES   = 400
 N_CLUSTERS  = 4
 RANDOM_SEED = 42
 
-# Recommendation scoring weights — must sum to 1.0
 SCORE_WEIGHTS = {
     'popularity': 0.30,
     'category':   0.25,
@@ -73,17 +89,11 @@ SCORE_WEIGHTS = {
     'rating':     0.25,
 }
 
-
 # ─────────────────────────────────────────────
-# SMALL HELPERS
+# HELPER FUNCTIONS
 # ─────────────────────────────────────────────
 
 def depth_index_to_level(depth_idx: float) -> str:
-    """
-    Convert a learning_depth_index (0–1) into a target
-    course level. Used by the recommender to decide what
-    level to push a user toward next.
-    """
     if depth_idx < 0.33:
         return 'Beginner'
     elif depth_idx < 0.67:
@@ -93,10 +103,6 @@ def depth_index_to_level(depth_idx: float) -> str:
 
 
 def adjacent_level(level: str) -> str:
-    """
-    Returns the 'next' level for partial-credit scoring
-    in the recommender (e.g. Beginner -> Intermediate).
-    """
     mapping = {
         'Beginner':     'Intermediate',
         'Intermediate': 'Advanced',
@@ -105,11 +111,18 @@ def adjacent_level(level: str) -> str:
     return mapping.get(level, '')
 
 
-def safe_divide(numerator, denominator, fill=0.0):
+def profession_to_segment_hint(profession: str) -> int:
     """
-    Divide two numpy arrays / pandas Series safely,
-    replacing divide-by-zero with `fill` instead of inf/NaN.
+    For cold-start new users — gives a segment hint
+    based on profession type before any enrollment history.
+    0=Eager, 1=CPD Collector, 2=Clinical Expert, 3=Browser
     """
-    denom = np.where(denominator == 0, 1, denominator)
-    result = numerator / denom
-    return np.where(denominator == 0, fill, result)
+    mapping = {
+        'Occupational Therapist': 2,
+        'Physiotherapist':        2,
+        'Kinderkineticist':       1,
+        'Classroom Teacher':      3,
+        'School Psychologist':    1,
+        'Parent/Caregiver':       3,
+    }
+    return mapping.get(profession, 0)

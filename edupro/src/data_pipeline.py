@@ -154,7 +154,12 @@ def load_raw_data(data_dir: str = 'data/raw') -> tuple:
     users        = pd.read_csv(paths['users'])
     courses      = pd.read_csv(paths['courses'])
     transactions = pd.read_csv(paths['transactions'])
-    transactions['TransactionDate'] = pd.to_datetime(transactions['TransactionDate'])
+
+    # Support both legacy ('TransactionDate') and EdUPro v2 ('EnrollmentDate') schemas.
+    if 'TransactionDate' in transactions.columns:
+        transactions['TransactionDate'] = pd.to_datetime(transactions['TransactionDate'])
+    elif 'EnrollmentDate' in transactions.columns:
+        transactions['EnrollmentDate'] = pd.to_datetime(transactions['EnrollmentDate'])
 
     return users, courses, transactions
 
