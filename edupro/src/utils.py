@@ -34,14 +34,14 @@ PROFESSION_TYPES = [
 ]
 
 # ─────────────────────────────────────────────
-# SEGMENT METADATA — EdUPro Professional Names
+# SEGMENT METADATA
 # ─────────────────────────────────────────────
 
 SEGMENT_NAMES = {
-    0: '🎓 Eager Learners',
-    1: '📜 CPD Collectors',
-    2: '🔬 Clinical Experts',
-    3: '👀 Curious Browsers'
+    0: 'Eager Learners',
+    1: 'CPD Collectors',
+    2: 'Clinical Experts',
+    3: 'Curious Browsers'
 }
 
 SEGMENT_COLORS = {
@@ -94,6 +94,7 @@ SCORE_WEIGHTS = {
 # ─────────────────────────────────────────────
 
 def depth_index_to_level(depth_idx: float) -> str:
+    """Convert learning_depth_index (0-1) to target course level."""
     if depth_idx < 0.33:
         return 'Beginner'
     elif depth_idx < 0.67:
@@ -103,12 +104,23 @@ def depth_index_to_level(depth_idx: float) -> str:
 
 
 def adjacent_level(level: str) -> str:
+    """Return the next level for partial-credit scoring."""
     mapping = {
         'Beginner':     'Intermediate',
         'Intermediate': 'Advanced',
         'Advanced':     'Intermediate'
     }
     return mapping.get(level, '')
+
+
+def safe_divide(numerator, denominator, fill=0.0):
+    """
+    Divide two numpy arrays safely,
+    replacing divide-by-zero with fill instead of inf/NaN.
+    """
+    denom  = np.where(denominator == 0, 1, denominator)
+    result = numerator / denom
+    return np.where(denominator == 0, fill, result)
 
 
 def profession_to_segment_hint(profession: str) -> int:

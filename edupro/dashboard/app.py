@@ -478,7 +478,11 @@ elif page == "👤 Learner Explorer":
 
     # ── Course Table ──────────────────────────
     st.markdown("<p class='section-title'>Enrolled Courses</p>", unsafe_allow_html=True)
-  
+    # NOTE: previously this merged against the GLOBAL transactions table
+    # deduped by CourseID only — if two different users bought the same
+    # course, drop_duplicates() could keep the other user's Amount/Date.
+    # user_tx2 (already filtered to this uid) has the correct Amount +
+    # TransactionDate directly, so merge onto that instead.
     course_tbl = (
         user_tx
         .merge(user_tx2[["CourseID", "Amount", "TransactionDate"]],
