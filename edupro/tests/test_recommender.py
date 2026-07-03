@@ -151,7 +151,7 @@ def test_recommend_filter_with_no_matches_returns_empty(setup_data):
 def test_cold_start_returns_results(setup_data):
     _, courses, _ = setup_data
     recs = recommend_new_user(
-        courses, goal='Career', category='Technology',
+courses, goal='Career', category='DCD & Motor Disorders',
         level='Beginner', top_n=5
     )
     assert len(recs) > 0
@@ -161,7 +161,7 @@ def test_cold_start_returns_results(setup_data):
 def test_cold_start_sorted_by_rating(setup_data):
     _, courses, _ = setup_data
     recs = recommend_new_user(
-        courses, goal='Skill', category='Business',
+    courses, goal='Skill', category='Fundamental Movement Skills',
         level='Intermediate', top_n=5
     )
     ratings = recs['CourseRating'].tolist()

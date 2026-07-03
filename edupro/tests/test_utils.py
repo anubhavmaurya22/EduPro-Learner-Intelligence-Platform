@@ -27,7 +27,7 @@ from src.utils import (
 # ── Constants sanity checks ───────────────────────────────────────────────────
 
 def test_categories_list_length():
-    assert len(CATEGORIES) == 8
+    assert len(CATEGORIES) == 6
 
 
 def test_levels_list_length():

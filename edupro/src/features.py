@@ -25,7 +25,7 @@ def engineer_features(users: pd.DataFrame,
     Builds the learner_profiles table — one row per user.
 
     Handles both column naming conventions:
-      - Legacy:  'TransactionDate', 'Amount'
+      - Legacy:  'EnrollmentDate', 'Amount'
       - EdUPro:  'EnrollmentDate',  'Amount', 'CPDPointsEarned',
                  'CompletionStatus', 'CertificateIssued'
 
@@ -44,11 +44,11 @@ def engineer_features(users: pd.DataFrame,
     tx = transactions.copy()
 
     # ── Normalise date column name ────────────
-    # generate.py v2 uses 'EnrollmentDate'; legacy uses 'TransactionDate'.
-    if 'EnrollmentDate' in tx.columns and 'TransactionDate' not in tx.columns:
-        tx = tx.rename(columns={'EnrollmentDate': 'TransactionDate'})
+    # generate.py v2 uses 'EnrollmentDate'; legacy uses 'EnrollmentDate'.
+    if 'EnrollmentDate' in tx.columns and 'EnrollmentDate' not in tx.columns:
+        tx = tx.rename(columns={'EnrollmentDate': 'EnrollmentDate'})
 
-    tx['TransactionDate'] = pd.to_datetime(tx['TransactionDate'])
+    tx['EnrollmentDate'] = pd.to_datetime(tx['EnrollmentDate'])
     tx = tx.merge(courses, on='CourseID', how='left')
 
     ref_date = pd.to_datetime(reference_date)
@@ -63,8 +63,8 @@ def engineer_features(users: pd.DataFrame,
         max_spending       = ('Amount',            'max'),
         avg_course_rating  = ('CourseRating',      'mean'),
         n_categories       = ('CourseCategory',    'nunique'),
-        first_enroll       = ('TransactionDate',   'min'),
-        last_enroll        = ('TransactionDate',   'max'),
+        first_enroll       = ('EnrollmentDate',   'min'),
+        last_enroll        = ('EnrollmentDate',   'max'),
     ).reset_index()
 
     # ── Step 2: Preferred category ───────────
