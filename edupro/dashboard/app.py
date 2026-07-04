@@ -817,7 +817,7 @@ elif page == "🔍 EDA & Analytics":
         **PLOTLY_LAYOUT,
         "height": 380,
         "xaxis_title": "Enrollment Frequency (courses/day)",
-        "yaxis_title": "Total Spending (R)",
+        "yaxis_title": "Total Spending (Rs-)",
     })
     st.plotly_chart(fig_sc2, use_container_width=True)
 
