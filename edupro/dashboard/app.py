@@ -199,11 +199,12 @@ if page == "📊 Platform Overview":
             line=dict(color="#f72585", width=2, dash="dot"),
             yaxis="y2"
         ))
-        fig.update_layout(
-            **PLOTLY_LAYOUT, height=300,
-            yaxis2=dict(overlaying="y", side="right",
-                        gridcolor="#2a3350", zerolinecolor="#2a3350")
-        )
+        fig.update_layout(**{
+            **PLOTLY_LAYOUT,
+            "height": 300,
+            "yaxis2": dict(overlaying="y", side="right",
+                           gridcolor="#2a3350", zerolinecolor="#2a3350"),
+        })
         st.plotly_chart(fig, use_container_width=True)
 
     with col_b:
@@ -215,7 +216,7 @@ if page == "📊 Platform Overview":
                     .sort_values("count"))
         fig2 = px.bar(cat_dist, x="count", y="CourseCategory", orientation="h",
                       color="count", color_continuous_scale="Blues")
-        fig2.update_layout(**PLOTLY_LAYOUT, height=300, coloraxis_showscale=False)
+        fig2.update_layout(**{**PLOTLY_LAYOUT, "height": 300, "coloraxis_showscale": False})
         st.plotly_chart(fig2, use_container_width=True)
 
     st.markdown("---")
@@ -243,7 +244,7 @@ if page == "📊 Platform Overview":
                       color="SegmentName", color_discrete_map=COLOR_MAP, hole=0.5)
         fig3.update_traces(textinfo="percent",
                            marker=dict(line=dict(color="#0f1117", width=2)))
-        fig3.update_layout(**PLOTLY_LAYOUT, height=360)
+        fig3.update_layout(**{**PLOTLY_LAYOUT, "height": 360})
         st.plotly_chart(fig3, use_container_width=True)
 
     st.markdown("---")
@@ -257,7 +258,7 @@ if page == "📊 Platform Overview":
                       color_discrete_sequence=["#4361ee","#f72585","#7209b7"],
                       title="Gender")
         fig4.update_traces(textinfo="percent+label", textfont_size=10)
-        fig4.update_layout(**PLOTLY_LAYOUT, height=280)
+        fig4.update_layout(**{**PLOTLY_LAYOUT, "height": 280})
         st.plotly_chart(fig4, use_container_width=True)
 
     with d2:
@@ -267,7 +268,7 @@ if page == "📊 Platform Overview":
             fig5 = px.bar(prof, x="Count", y="Profession", orientation="h",
                           color="Count", color_continuous_scale="Blues",
                           title="Profession Type")
-            fig5.update_layout(**PLOTLY_LAYOUT, height=280, coloraxis_showscale=False)
+            fig5.update_layout(**{**PLOTLY_LAYOUT, "height": 280, "coloraxis_showscale": False})
             st.plotly_chart(fig5, use_container_width=True)
         else:
             bins   = [17,24,34,44,54,65]
@@ -279,7 +280,7 @@ if page == "📊 Platform Overview":
             fig5 = px.bar(ag, x="AgeGroup", y="Count",
                           color="Count", color_continuous_scale="Blues",
                           title="Age Distribution")
-            fig5.update_layout(**PLOTLY_LAYOUT, height=280, coloraxis_showscale=False)
+            fig5.update_layout(**{**PLOTLY_LAYOUT, "height": 280, "coloraxis_showscale": False})
             st.plotly_chart(fig5, use_container_width=True)
 
     with d3:
@@ -290,7 +291,7 @@ if page == "📊 Platform Overview":
                       color_discrete_sequence=["#4cc9f0","#4361ee","#7209b7"],
                       title="Enrollment by Level")
         fig6.update_traces(textinfo="percent+label", textfont_size=10)
-        fig6.update_layout(**PLOTLY_LAYOUT, height=280)
+        fig6.update_layout(**{**PLOTLY_LAYOUT, "height": 280})
         st.plotly_chart(fig6, use_container_width=True)
 
 
@@ -366,15 +367,16 @@ elif page == "👤 Professional Explorer":
             line=dict(color="#8fa3bf", width=1.5, dash="dot"),
             name="Segment Avg"
         ))
-        fig_r.update_layout(
-            **PLOTLY_LAYOUT, height=380,
-            polar=dict(
+        fig_r.update_layout(**{
+            **PLOTLY_LAYOUT,
+            "height": 380,
+            "polar": dict(
                 bgcolor="rgba(0,0,0,0)",
-                radialaxis=dict(visible=True, range=[0,1],
+                radialaxis=dict(visible=True, range=[0, 1],
                                 gridcolor="#2a3350", color="#8fa3bf"),
                 angularaxis=dict(gridcolor="#2a3350", color="#8fa3bf"),
-            )
-        )
+            ),
+        })
         st.plotly_chart(fig_r, use_container_width=True)
 
     with col_b:
@@ -386,17 +388,20 @@ elif page == "👤 Professional Explorer":
         cat_c.columns = ["Category","Count"]
         fig_c = px.bar(cat_c, x="Count", y="Category", orientation="h",
                        color="Count", color_continuous_scale="Blues")
-        fig_c.update_layout(**{**PLOTLY_LAYOUT, "yaxis": dict(gridcolor="#2a3350", categoryorder="total ascending")},
-                            height=200,
-                            coloraxis_showscale=False,
-                            margin=dict(l=0,r=0,t=10,b=0))
+        fig_c.update_layout(**{
+            **PLOTLY_LAYOUT,
+            "yaxis": dict(gridcolor="#2a3350", categoryorder="total ascending"),
+            "height": 200,
+            "coloraxis_showscale": False,
+            "margin": dict(l=0, r=0, t=10, b=0),
+        })
         st.plotly_chart(fig_c, use_container_width=True)
 
         lvl_c = user_tx["CourseLevel"].value_counts().reset_index()
         lvl_c.columns = ["Level","Count"]
         fig_l = px.pie(lvl_c, values="Count", names="Level", hole=0.5,
                        color_discrete_sequence=["#4cc9f0","#4361ee","#7209b7"])
-        fig_l.update_layout(**PLOTLY_LAYOUT, height=200, margin=dict(l=0,r=0,t=10,b=0))
+        fig_l.update_layout(**{**PLOTLY_LAYOUT, "height": 200, "margin": dict(l=0, r=0, t=10, b=0)})
         fig_l.update_traces(textinfo="percent+label", textfont_size=10)
         st.plotly_chart(fig_l, use_container_width=True)
 
@@ -407,7 +412,7 @@ elif page == "👤 Professional Explorer":
             .reset_index(name="Enrollments"))
     fig_h = px.bar(hist, x="Month", y="Enrollments",
                    color_discrete_sequence=[color])
-    fig_h.update_layout(**PLOTLY_LAYOUT, height=220)
+    fig_h.update_layout(**{**PLOTLY_LAYOUT, "height": 220})
     st.plotly_chart(fig_h, use_container_width=True)
 
     st.markdown("<p class='section-title'>CPD Course History</p>", unsafe_allow_html=True)
@@ -518,8 +523,12 @@ elif page == "🔮 Recommendations":
                 y=[round(r[col_nm] * wt, 3) for _, r in recs.iterrows()],
                 marker_color=clr
             ))
-        fig_sc.update_layout(**PLOTLY_LAYOUT, barmode="stack", height=320,
-                             yaxis_title="Weighted Score")
+        fig_sc.update_layout(**{
+            **PLOTLY_LAYOUT,
+            "barmode": "stack",
+            "height": 320,
+            "yaxis_title": "Weighted Score",
+        })
         st.plotly_chart(fig_sc, use_container_width=True)
 
 
@@ -541,9 +550,12 @@ elif page == "🔵 Cluster Map":
                     "SilhouetteVal": ":.3f", "PCA_1": False, "PCA_2": False}
     )
     fig_pca.update_traces(marker=dict(size=5))
-    fig_pca.update_layout(**PLOTLY_LAYOUT, height=450,
-                          xaxis_title="Principal Component 1",
-                          yaxis_title="Principal Component 2")
+    fig_pca.update_layout(**{
+        **PLOTLY_LAYOUT,
+        "height": 450,
+        "xaxis_title": "Principal Component 1",
+        "yaxis_title": "Principal Component 2",
+    })
     st.plotly_chart(fig_pca, use_container_width=True)
 
     # Elbow + Silhouette
@@ -560,8 +572,12 @@ elif page == "🔵 Cluster Map":
         ))
         fig_el.add_vline(x=N_CLUSTERS, line_dash="dash", line_color="#4cc9f0",
                          annotation_text=f"k={N_CLUSTERS} chosen")
-        fig_el.update_layout(**PLOTLY_LAYOUT, height=300,
-                             xaxis_title="k (Clusters)", yaxis_title="Inertia (WCSS)")
+        fig_el.update_layout(**{
+            **PLOTLY_LAYOUT,
+            "height": 300,
+            "xaxis_title": "k (Clusters)",
+            "yaxis_title": "Inertia (WCSS)",
+        })
         st.plotly_chart(fig_el, use_container_width=True)
 
     with col_s:
@@ -574,8 +590,12 @@ elif page == "🔵 Cluster Map":
         ))
         fig_sil.add_vline(x=N_CLUSTERS, line_dash="dash", line_color="#4cc9f0",
                           annotation_text=f"k={N_CLUSTERS} chosen")
-        fig_sil.update_layout(**PLOTLY_LAYOUT, height=300,
-                              xaxis_title="k (Clusters)", yaxis_title="Silhouette Score")
+        fig_sil.update_layout(**{
+            **PLOTLY_LAYOUT,
+            "height": 300,
+            "xaxis_title": "k (Clusters)",
+            "yaxis_title": "Silhouette Score",
+        })
         st.plotly_chart(fig_sil, use_container_width=True)
 
     # Per-user silhouette
@@ -588,10 +608,12 @@ elif page == "🔵 Cluster Map":
     fig_sv.add_hline(y=cr["overall_silhouette"], line_dash="dash",
                      line_color="#4cc9f0",
                      annotation_text=f"Avg={cr['overall_silhouette']:.3f}")
-    fig_sv.update_layout(**{**PLOTLY_LAYOUT, "xaxis": dict(showticklabels=False,
-                                                           title="Professionals (sorted by segment)")},
-                         height=300,
-                         yaxis_title="Silhouette Value")
+    fig_sv.update_layout(**{
+        **PLOTLY_LAYOUT,
+        "xaxis": dict(showticklabels=False, title="Professionals (sorted by segment)"),
+        "height": 300,
+        "yaxis_title": "Silhouette Value",
+    })
     st.plotly_chart(fig_sv, use_container_width=True)
 
     # Radar profiles 2x2
@@ -656,8 +678,12 @@ elif page == "📈 Segment Insights":
                      color="SegmentName", color_discrete_map=COLOR_MAP,
                      text="mean_val")
     fig_cmp.update_traces(texttemplate="%{text:.2f}", textposition="outside")
-    fig_cmp.update_layout(**PLOTLY_LAYOUT, height=340,
-                          yaxis_title=chosen, showlegend=False)
+    fig_cmp.update_layout(**{
+        **PLOTLY_LAYOUT,
+        "height": 340,
+        "yaxis_title": chosen,
+        "showlegend": False,
+    })
     st.plotly_chart(fig_cmp, use_container_width=True)
 
     # Normalised heatmap
@@ -672,7 +698,7 @@ elif page == "📈 Segment Insights":
     fig_ht = px.imshow(heat_norm.T, color_continuous_scale="RdBu",
                        text_auto=".2f", aspect="auto",
                        labels=dict(x="Segment", y="Feature", color="Norm."))
-    fig_ht.update_layout(**PLOTLY_LAYOUT, height=360)
+    fig_ht.update_layout(**{**PLOTLY_LAYOUT, "height": 360})
     st.plotly_chart(fig_ht, use_container_width=True)
 
     # Category mix + Level mix
@@ -688,7 +714,7 @@ elif page == "📈 Segment Insights":
         cat_seg["pct"] = cat_seg["count"] / cat_seg.groupby("SegmentName")["count"].transform("sum") * 100
         fig_cs = px.bar(cat_seg, x="SegmentName", y="pct", color="CourseCategory",
                         barmode="stack", color_discrete_sequence=px.colors.qualitative.Set3)
-        fig_cs.update_layout(**PLOTLY_LAYOUT, height=360, yaxis_title="% of Enrollments")
+        fig_cs.update_layout(**{**PLOTLY_LAYOUT, "height": 360, "yaxis_title": "% of Enrollments"})
         st.plotly_chart(fig_cs, use_container_width=True)
 
     with col_lvl:
@@ -703,7 +729,7 @@ elif page == "📈 Segment Insights":
                         color_discrete_map={"Beginner":"#4cc9f0",
                                             "Intermediate":"#4361ee",
                                             "Advanced":"#7209b7"})
-        fig_ls.update_layout(**PLOTLY_LAYOUT, height=360, yaxis_title="% of Enrollments")
+        fig_ls.update_layout(**{**PLOTLY_LAYOUT, "height": 360, "yaxis_title": "% of Enrollments"})
         st.plotly_chart(fig_ls, use_container_width=True)
 
     # Spending box plot
@@ -711,8 +737,12 @@ elif page == "📈 Segment Insights":
     st.markdown("<p class='section-title'>CPD Spending Distribution by Segment</p>", unsafe_allow_html=True)
     fig_bx = px.box(profiles, x="SegmentName", y="total_spending",
                     color="SegmentName", color_discrete_map=COLOR_MAP, points="outliers")
-    fig_bx.update_layout(**PLOTLY_LAYOUT, height=340,
-                         yaxis_title="Total Spending (R)", showlegend=False)
+    fig_bx.update_layout(**{
+        **PLOTLY_LAYOUT,
+        "height": 340,
+        "yaxis_title": "Total Spending (R)",
+        "showlegend": False,
+    })
     st.plotly_chart(fig_bx, use_container_width=True)
 
 
@@ -738,8 +768,12 @@ elif page == "🔍 EDA & Analytics":
         st.markdown("<p class='section-title'>Rating Distribution</p>", unsafe_allow_html=True)
         fig_rat = px.histogram(courses, x="CourseRating", nbins=25,
                                color_discrete_sequence=["#4361ee"])
-        fig_rat.update_layout(**PLOTLY_LAYOUT, height=260,
-                              xaxis_title="Rating", yaxis_title="Courses")
+        fig_rat.update_layout(**{
+            **PLOTLY_LAYOUT,
+            "height": 260,
+            "xaxis_title": "Rating",
+            "yaxis_title": "Courses",
+        })
         st.plotly_chart(fig_rat, use_container_width=True)
 
     with col_r2:
@@ -749,9 +783,12 @@ elif page == "🔍 EDA & Analytics":
                      .sort_values("CourseRating", ascending=False))
         fig_rc = px.bar(rc, x="CourseRating", y="CourseCategory", orientation="h",
                         color="CourseRating", color_continuous_scale="Blues")
-        fig_rc.update_layout(**{**PLOTLY_LAYOUT, "yaxis": dict(gridcolor="#2a3350",
-                                                               categoryorder="total ascending")},
-                             height=260, coloraxis_showscale=False)
+        fig_rc.update_layout(**{
+            **PLOTLY_LAYOUT,
+            "yaxis": dict(gridcolor="#2a3350", categoryorder="total ascending"),
+            "height": 260,
+            "coloraxis_showscale": False,
+        })
         st.plotly_chart(fig_rc, use_container_width=True)
 
     # Correlation heatmap
@@ -764,7 +801,7 @@ elif page == "🔍 EDA & Analytics":
     corr_df = profiles[[f for f in corr_feats if f in profiles.columns]].corr().round(2)
     fig_cor = px.imshow(corr_df, text_auto=".2f",
                         color_continuous_scale="RdBu_r", zmin=-1, zmax=1, aspect="auto")
-    fig_cor.update_layout(**PLOTLY_LAYOUT, height=440)
+    fig_cor.update_layout(**{**PLOTLY_LAYOUT, "height": 440})
     st.plotly_chart(fig_cor, use_container_width=True)
 
     # Scatter: frequency vs spending
@@ -776,9 +813,12 @@ elif page == "🔍 EDA & Analytics":
         hover_data=["UserID","preferred_category","total_courses"]
     )
     fig_sc2.update_traces(marker=dict(size=5))
-    fig_sc2.update_layout(**PLOTLY_LAYOUT, height=380,
-                          xaxis_title="Enrollment Frequency (courses/day)",
-                          yaxis_title="Total Spending (R)")
+    fig_sc2.update_layout(**{
+        **PLOTLY_LAYOUT,
+        "height": 380,
+        "xaxis_title": "Enrollment Frequency (courses/day)",
+        "yaxis_title": "Total Spending (R)",
+    })
     st.plotly_chart(fig_sc2, use_container_width=True)
 
     # Business insights
