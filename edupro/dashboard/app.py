@@ -773,8 +773,7 @@ elif page == "🔍 EDA & Analytics":
     fig_sc2 = px.scatter(
         profiles, x="enrollment_frequency", y="total_spending",
         color="SegmentName", color_discrete_map=COLOR_MAP, opacity=0.65,
-        hover_data=["UserID","preferred_category","total_courses"],
-        trendline="ols"
+        hover_data=["UserID","preferred_category","total_courses"]
     )
     fig_sc2.update_traces(marker=dict(size=5))
     fig_sc2.update_layout(**PLOTLY_LAYOUT, height=380,
