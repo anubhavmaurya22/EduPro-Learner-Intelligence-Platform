@@ -167,8 +167,8 @@ if page == "📊 Platform Overview":
     active_pct  = (profiles["total_courses"] >= 3).mean() * 100
 
     k1, k2, k3, k4 = st.columns(4)
-    k1.metric("Total CPD Revenue",      f"R{total_rev:,.0f}",   "↑ 18% YoY")
-    k2.metric("Avg Professional LTV",   f"R{avg_ltv:,.2f}",    "↑ 11%")
+    k1.metric("Total CPD Revenue",      f"Rs-{total_rev:,.0f}",   "↑ 18% YoY")
+    k2.metric("Avg Professional LTV",   f"Rs-{avg_ltv:,.2f}",    "↑ 11%")
     k3.metric("Avg Courses/Professional",f"{avg_courses:.1f}", "↑ 2.3")
     k4.metric("Active Retention",        f"{active_pct:.1f}%", "↑ 4.2pp")
 
@@ -329,8 +329,8 @@ elif page == "👤 Professional Explorer":
 
     m1, m2, m3, m4, m5 = st.columns(5)
     m1.metric("CPD Courses",        int(row["total_courses"]))
-    m2.metric("Total Spent",        f"R{row['total_spending']:,.2f}")
-    m3.metric("Avg per Course",     f"R{row['avg_spending']:.2f}")
+    m2.metric("Total Spent",        f"Rs-{row['total_spending']:,.2f}")
+    m3.metric("Avg per Course",     f"Rs-{row['avg_spending']:.2f}")
     m4.metric("Avg Rating",         f"{row['avg_course_rating']:.2f}★")
     m5.metric("Learning Depth",     f"{row['learning_depth_index']:.2f}")
 
@@ -662,8 +662,8 @@ elif page == "📈 Segment Insights":
     st.markdown("<p class='section-title'>Feature Comparison by Segment</p>", unsafe_allow_html=True)
     feat_options = {
         "Total CPD Courses":    "total_courses",
-        "Avg Spend (R)":        "avg_spending",
-        "Total Spend (R)":      "total_spending",
+        "Avg Spend (Rs-)":        "avg_spending",
+        "Total Spend (Rs-)":      "total_spending",
         "Avg Course Rating":    "avg_course_rating",
         "Learning Depth Index": "learning_depth_index",
         "Category Diversity":   "n_categories",
@@ -740,7 +740,7 @@ elif page == "📈 Segment Insights":
     fig_bx.update_layout(**{
         **PLOTLY_LAYOUT,
         "height": 340,
-        "yaxis_title": "Total Spending (R)",
+        "yaxis_title": "Total Spending (Rs-)",
         "showlegend": False,
     })
     st.plotly_chart(fig_bx, use_container_width=True)
@@ -855,8 +855,8 @@ elif page == "🔍 EDA & Analytics":
                         "Avg Categories","Silhouette"]
     st.dataframe(
         summary.style.format({
-            "Avg Spend/Course (R)": "R{:.2f}",
-            "Avg Total Spend (R)":  "R{:.2f}",
+            "Avg Spend/Course (R)": "Rs-{:.2f}",
+            "Avg Total Spend (R)":  "Rs-{:.2f}",
             "Avg CPD Courses":      "{:.1f}",
             "Avg Rating":           "{:.2f}",
             "Depth Index":          "{:.3f}",
