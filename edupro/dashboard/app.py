@@ -386,10 +386,10 @@ elif page == "👤 Professional Explorer":
         cat_c.columns = ["Category","Count"]
         fig_c = px.bar(cat_c, x="Count", y="Category", orientation="h",
                        color="Count", color_continuous_scale="Blues")
-        fig_c.update_layout(**PLOTLY_LAYOUT, height=200,
+        fig_c.update_layout(**{**PLOTLY_LAYOUT, "yaxis": dict(gridcolor="#2a3350", categoryorder="total ascending")},
+                            height=200,
                             coloraxis_showscale=False,
-                            margin=dict(l=0,r=0,t=10,b=0),
-                            yaxis=dict(gridcolor="#2a3350", categoryorder="total ascending"))
+                            margin=dict(l=0,r=0,t=10,b=0))
         st.plotly_chart(fig_c, use_container_width=True)
 
         lvl_c = user_tx["CourseLevel"].value_counts().reset_index()
@@ -588,9 +588,9 @@ elif page == "🔵 Cluster Map":
     fig_sv.add_hline(y=cr["overall_silhouette"], line_dash="dash",
                      line_color="#4cc9f0",
                      annotation_text=f"Avg={cr['overall_silhouette']:.3f}")
-    fig_sv.update_layout(**PLOTLY_LAYOUT, height=300,
-                         xaxis=dict(showticklabels=False,
-                                    title="Professionals (sorted by segment)"),
+    fig_sv.update_layout(**{**PLOTLY_LAYOUT, "xaxis": dict(showticklabels=False,
+                                                           title="Professionals (sorted by segment)")},
+                         height=300,
                          yaxis_title="Silhouette Value")
     st.plotly_chart(fig_sv, use_container_width=True)
 
@@ -749,9 +749,9 @@ elif page == "🔍 EDA & Analytics":
                      .sort_values("CourseRating", ascending=False))
         fig_rc = px.bar(rc, x="CourseRating", y="CourseCategory", orientation="h",
                         color="CourseRating", color_continuous_scale="Blues")
-        fig_rc.update_layout(**PLOTLY_LAYOUT, height=260, coloraxis_showscale=False,
-                             yaxis=dict(gridcolor="#2a3350",
-                                        categoryorder="total ascending"))
+        fig_rc.update_layout(**{**PLOTLY_LAYOUT, "yaxis": dict(gridcolor="#2a3350",
+                                                               categoryorder="total ascending")},
+                             height=260, coloraxis_showscale=False)
         st.plotly_chart(fig_rc, use_container_width=True)
 
     # Correlation heatmap
