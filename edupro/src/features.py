@@ -44,9 +44,9 @@ def engineer_features(users: pd.DataFrame,
     tx = transactions.copy()
 
     # ── Normalise date column name ────────────
-    # generate.py v2 uses 'EnrollmentDate'; legacy uses 'EnrollmentDate'.
-    if 'EnrollmentDate' in tx.columns and 'EnrollmentDate' not in tx.columns:
-        tx = tx.rename(columns={'EnrollmentDate': 'EnrollmentDate'})
+    # generate.py v2 uses 'EnrollmentDate'; legacy schema uses 'TransactionDate'.
+    if 'TransactionDate' in tx.columns and 'EnrollmentDate' not in tx.columns:
+        tx = tx.rename(columns={'TransactionDate': 'EnrollmentDate'})
 
     tx['EnrollmentDate'] = pd.to_datetime(tx['EnrollmentDate'])
     tx = tx.merge(courses, on='CourseID', how='left')
