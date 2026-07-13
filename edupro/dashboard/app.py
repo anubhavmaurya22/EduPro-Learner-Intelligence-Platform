@@ -22,78 +22,7 @@ from src import (
     SEGMENT_NAMES, SEGMENT_COLORS, SEGMENT_DESC,
     CATEGORIES, LEVELS, CLUSTERING_FEATURES, N_CLUSTERS
 )
-
-# ─────────────────────────────────────────────
-# PAGE CONFIG
-# ─────────────────────────────────────────────
-
-st.set_page_config(
-    page_title="EdUPro Learner Intelligence",
-    page_icon="🧠",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
-
-# ─────────────────────────────────────────────
-# CSS THEME
-# ─────────────────────────────────────────────
-
-st.markdown("""
-<style>
-    .stApp { background: #0f1117; }
-    section[data-testid="stSidebar"] { background: #161b27; }
-    [data-testid="stMetric"] {
-        background: #1e2535;
-        border-radius: 12px;
-        padding: 14px 18px;
-        border: 1px solid #2a3350;
-    }
-    [data-testid="stMetricLabel"] { color: #8fa3bf !important; font-size: 0.78rem; }
-    [data-testid="stMetricValue"] { color: #e8edf5 !important; font-size: 1.6rem; font-weight: 700; }
-    [data-testid="stMetricDelta"] { color: #4cc9f0 !important; }
-    .seg-card {
-        background: #1e2535; border-radius: 14px;
-        padding: 18px 20px; border-left: 5px solid;
-        margin-bottom: 10px;
-    }
-    .seg-card h3 { margin: 0 0 4px 0; font-size: 1.1rem; }
-    .seg-card p  { margin: 0; font-size: 0.82rem; color: #8fa3bf; }
-    .section-title {
-        font-size: 1.2rem; font-weight: 700;
-        color: #e8edf5; margin: 0 0 12px 0;
-        border-bottom: 2px solid #2a3350; padding-bottom: 6px;
-    }
-    .insight-box {
-        background: #1e2535; border-radius: 10px; padding: 14px 18px;
-        border-left: 4px solid #f72585; margin-bottom: 8px;
-        font-size: 0.85rem; color: #c8d6e8;
-    }
-    .course-card {
-        background: #1e2535; border-radius: 12px;
-        padding: 16px 18px; border: 1px solid #2a3350;
-        margin-bottom: 10px;
-    }
-    .score-bar  { height: 8px; background: #2a3350; border-radius: 4px; margin-top: 6px; }
-    .score-fill { height: 8px; border-radius: 4px; }
-</style>
-""", unsafe_allow_html=True)
-
-PLOTLY_LAYOUT = dict(
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor ="rgba(0,0,0,0)",
-    font_color   ="#c8d6e8",
-    font_family  ="Inter, sans-serif",
-    margin       =dict(l=30, r=20, t=40, b=30),
-    xaxis        =dict(gridcolor="#2a3350", zerolinecolor="#2a3350"),
-    yaxis        =dict(gridcolor="#2a3350", zerolinecolor="#2a3350"),
-)
-
-COLOR_MAP = {v: SEGMENT_COLORS[k] for k, v in SEGMENT_NAMES.items()}
-
-# ─────────────────────────────────────────────
-# LOAD DATA (cached)
-# ─────────────────────────────────────────────
-
+# Add at top of recommendations page (after imports)
 @st.cache_data(show_spinner=True)
 def load_all():
     users, courses, transactions = generate_data(n_users=500, n_courses=200)
@@ -104,6 +33,15 @@ def load_all():
     return users, courses, transactions, profiles, cr, cp
 
 
+
+PLOTLY_LAYOUT = dict(
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor ="rgba(0,0,0,0)",
+    font_color   ="#c8d6e8",
+    font_family  ="Inter, sans-serif",
+)
+
+COLOR_MAP = {v: SEGMENT_COLORS[k] for k, v in SEGMENT_NAMES.items()}
 with st.spinner("Loading EdUPro Intelligence Engine..."):
     users, courses, transactions, profiles, cr, cp = load_all()
 
@@ -866,3 +804,6 @@ elif page == "🔍 EDA & Analytics":
         use_container_width=True, hide_index=True
     )
     
+
+
+

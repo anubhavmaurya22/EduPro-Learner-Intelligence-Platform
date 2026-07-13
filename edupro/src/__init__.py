@@ -20,3 +20,9 @@ __all__ = [
     'run_clustering', 'get_cluster_profiles', 'attach_cluster_labels',
     'recommend_courses', 'recommend_new_user', 'evaluate_recommendation_quality',
 ]   
+
+from .feedback import (
+    save_feedback, load_feedback,
+    get_feedback_stats, get_liked_courses,
+    get_disliked_courses, compute_feedback_weights
+)
