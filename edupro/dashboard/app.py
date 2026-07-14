@@ -42,6 +42,10 @@ PLOTLY_LAYOUT = dict(
 )
 
 COLOR_MAP = {v: SEGMENT_COLORS[k] for k, v in SEGMENT_NAMES.items()}
+PLOTLY_LAYOUT = dict(paper_bgcolor="rgba(0,0,0,0)",plot_bgcolor="rgba(0,0,0,0)",font_color="#c8d6e8",font_family="Inter, sans-serif")
+
+COLOR_MAP = {v: SEGMENT_COLORS[k] for k, v in SEGMENT_NAMES.items()}
+
 with st.spinner("Loading EdUPro Intelligence Engine..."):
     users, courses, transactions, profiles, cr, cp = load_all()
 
@@ -66,17 +70,18 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     page = st.radio(
-        "Navigate",
-        options=[
-            "📊 Platform Overview",
-            "👤 Professional Explorer",
-            "🔮 Recommendations",
-            "🔵 Cluster Map",
-            "📈 Segment Insights",
-            "🔍 EDA & Analytics",
-        ],
-        label_visibility="collapsed",
-    )
+    "Navigate",
+    options=[
+        "📊 Platform Overview",
+        "👤 Professional Explorer",
+        "🔮 Recommendations",
+        "🔵 Cluster Map",
+        "📈 Segment Insights",
+        "🔍 EDA & Analytics",
+        "📣 Feedback Analytics",    # ← ADD THIS LINE
+    ],
+    label_visibility="collapsed",
+)
 
     st.markdown("---")
     st.markdown(f"""
@@ -248,6 +253,7 @@ elif page == "👤 Professional Explorer":
 
     prof_type = row.get("ProfessionType", "Professional")
 
+
     st.markdown(f"""
     <div class='seg-card' style='border-color:{color};display:flex;gap:24px;align-items:center'>
         <div style='font-size:3rem'>🩺</div>
@@ -378,6 +384,15 @@ elif page == "🔮 Recommendations":
     with col_f2:
         f_lvl = st.selectbox("Filter Level", ["All"] + LEVELS)
 
+    # ── Feedback helpers (after uid_r is defined) ────
+    from src.feedback import (
+        save_feedback, get_feedback_stats,
+        get_liked_courses, get_disliked_courses
+    )
+    fb_stats     = get_feedback_stats()
+    liked_ids    = get_liked_courses(uid_r)
+    disliked_ids = get_disliked_courses(uid_r)
+
     recs = recommend_courses(
         uid_r, profiles, courses, transactions, top_n=8,
         filter_category=f_cat if f_cat != "All" else None,
@@ -399,54 +414,82 @@ elif page == "🔮 Recommendations":
     </div>
     """, unsafe_allow_html=True)
 
-    # Weight legend
-    wl = st.columns(4)
-    wl[0].markdown("<div style='background:#1e2535;border-radius:8px;padding:8px;text-align:center;font-size:0.78rem;color:#8fa3bf'>🔵 Peer Popularity<br><b style='color:#4361ee'>30%</b></div>", unsafe_allow_html=True)
-    wl[1].markdown("<div style='background:#1e2535;border-radius:8px;padding:8px;text-align:center;font-size:0.78rem;color:#8fa3bf'>🎯 Specialty Match<br><b style='color:#f72585'>25%</b></div>", unsafe_allow_html=True)
-    wl[2].markdown("<div style='background:#1e2535;border-radius:8px;padding:8px;text-align:center;font-size:0.78rem;color:#8fa3bf'>📶 Level Fit<br><b style='color:#7209b7'>20%</b></div>", unsafe_allow_html=True)
-    wl[3].markdown("<div style='background:#1e2535;border-radius:8px;padding:8px;text-align:center;font-size:0.78rem;color:#8fa3bf'>⭐ Course Rating<br><b style='color:#4cc9f0'>25%</b></div>", unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
     if recs.empty:
-        st.warning("No courses match the current filters. Try widening your selection.")
+        st.warning("No courses match filters.")
     else:
+        # Weight legend
+        wl = st.columns(4)
+        wl[0].markdown("<div style='background:#1e2535;border-radius:8px;padding:8px;text-align:center;font-size:0.78rem;color:#8fa3bf'>🔵 Peer Popularity<br><b style='color:#4361ee'>30%</b></div>", unsafe_allow_html=True)
+        wl[1].markdown("<div style='background:#1e2535;border-radius:8px;padding:8px;text-align:center;font-size:0.78rem;color:#8fa3bf'>🎯 Specialty Match<br><b style='color:#f72585'>25%</b></div>", unsafe_allow_html=True)
+        wl[2].markdown("<div style='background:#1e2535;border-radius:8px;padding:8px;text-align:center;font-size:0.78rem;color:#8fa3bf'>📶 Level Fit<br><b style='color:#7209b7'>20%</b></div>", unsafe_allow_html=True)
+        wl[3].markdown("<div style='background:#1e2535;border-radius:8px;padding:8px;text-align:center;font-size:0.78rem;color:#8fa3bf'>⭐ Rating Quality<br><b style='color:#4cc9f0'>25%</b></div>", unsafe_allow_html=True)
+
+        # Feedback summary banner
+        if fb_stats['total'] > 0:
+            st.markdown("<br>", unsafe_allow_html=True)
+            fb1, fb2, fb3, fb4 = st.columns(4)
+            fb1.metric("Total Ratings",  fb_stats['total'])
+            fb2.metric("👍 Liked",       fb_stats['liked'])
+            fb3.metric("👎 Disliked",    fb_stats['disliked'])
+            fb4.metric("Approval Rate",  f"{fb_stats['rate']}%")
+
+        st.markdown("<br>", unsafe_allow_html=True)
         left_col, right_col = st.columns(2)
+
         for i, rec_row in recs.iterrows():
-            score_pct = int(rec_row["RecommendationScore"] * 100)
-            card = f"""
+            score_pct        = int(rec_row["RecommendationScore"] * 100)
+            cid              = rec_row["CourseID"]
+            already_liked    = cid in liked_ids
+            already_disliked = cid in disliked_ids
+
+            card_html = f"""
             <div class='course-card'>
                 <div style='display:flex;justify-content:space-between;align-items:flex-start'>
                     <span style='font-size:1.4rem;font-weight:700;color:#4cc9f0'>#{int(rec_row["Rank"])}</span>
-                    <span style='font-size:0.75rem;background:#2a3350;padding:2px 8px;border-radius:20px;color:#8fa3bf'>{rec_row["CourseID"]}</span>
+                    <span style='font-size:.75rem;background:#2a3350;padding:2px 8px;border-radius:20px;color:#8fa3bf'>{cid}</span>
                 </div>
                 <div style='font-size:1rem;font-weight:600;color:#e8edf5;margin-top:4px'>
                     {rec_row["CourseCategory"]} · {rec_row["CourseLevel"]}
                 </div>
-                <div style='font-size:0.78rem;color:#8fa3bf;margin-top:4px'>
-                    📹 {rec_row["CourseType"]} &nbsp;|&nbsp;
-                    ⭐ {rec_row["CourseRating"]} &nbsp;|&nbsp;
-                    Score: <b style='color:#4cc9f0'>{score_pct}%</b>
+                <div style='font-size:.78rem;color:#8fa3bf;margin-top:4px'>
+                    📹 {rec_row["CourseType"]} &nbsp;|&nbsp; ⭐ {rec_row["CourseRating"]}
+                    &nbsp;|&nbsp; Score: <b style='color:#4cc9f0'>{score_pct}%</b>
                 </div>
                 <div class='score-bar'>
                     <div class='score-fill' style='width:{score_pct}%;background:{color}'></div>
                 </div>
                 <div style='display:flex;gap:6px;margin-top:8px;flex-wrap:wrap'>
-                    <span style='font-size:0.7rem;background:rgba(67,97,238,0.2);color:#4361ee;padding:2px 8px;border-radius:12px'>Pop {int(rec_row["pop_score"]*100)}%</span>
-                    <span style='font-size:0.7rem;background:rgba(247,37,133,0.2);color:#f72585;padding:2px 8px;border-radius:12px'>Cat {int(rec_row["cat_score"]*100)}%</span>
-                    <span style='font-size:0.7rem;background:rgba(114,9,183,0.2);color:#b57bee;padding:2px 8px;border-radius:12px'>Lvl {int(rec_row["lvl_score"]*100)}%</span>
-                    <span style='font-size:0.7rem;background:rgba(76,201,240,0.2);color:#4cc9f0;padding:2px 8px;border-radius:12px'>Rtg {int(rec_row["rating_score"]*100)}%</span>
+                    <span style='font-size:.7rem;background:rgba(67,97,238,.2);color:#4361ee;padding:2px 8px;border-radius:12px'>Pop {int(rec_row["pop_score"]*100)}%</span>
+                    <span style='font-size:.7rem;background:rgba(247,37,133,.2);color:#f72585;padding:2px 8px;border-radius:12px'>Cat {int(rec_row["cat_score"]*100)}%</span>
+                    <span style='font-size:.7rem;background:rgba(114,9,183,.2);color:#b57bee;padding:2px 8px;border-radius:12px'>Lvl {int(rec_row["lvl_score"]*100)}%</span>
+                    <span style='font-size:.7rem;background:rgba(76,201,240,.2);color:#4cc9f0;padding:2px 8px;border-radius:12px'>Rtg {int(rec_row["rating_score"]*100)}%</span>
                 </div>
-                <div style='font-size:0.75rem;color:#4cc9f0;margin-top:6px;font-style:italic'>{rec_row["MatchReason"]}</div>
+                <div style='font-size:.75rem;color:#4cc9f0;margin-top:6px;font-style:italic'>
+                    {rec_row["MatchReason"]}
+                </div>
             </div>"""
-            if i % 2 == 0:
-                left_col.markdown(card, unsafe_allow_html=True)
-            else:
-                right_col.markdown(card, unsafe_allow_html=True)
+
+            target_col = left_col if i % 2 == 0 else right_col
+            with target_col:
+                st.markdown(card_html, unsafe_allow_html=True)
+                btn1, btn2 = st.columns(2)
+                with btn1:
+                    label = "👍 Liked!" if already_liked else "👍 Like"
+                    if st.button(label, key=f"like_{uid_r}_{cid}_{i}",
+                                 use_container_width=True):
+                        save_feedback(uid_r, cid, True)
+                        st.rerun()
+                with btn2:
+                    label = "👎 Disliked!" if already_disliked else "👎 Dislike"
+                    if st.button(label, key=f"dislike_{uid_r}_{cid}_{i}",
+                                 use_container_width=True):
+                        save_feedback(uid_r, cid, False)
+                        st.rerun()
 
         # Score breakdown chart
         st.markdown("---")
-        st.markdown("<p class='section-title'>Score Breakdown (Top 8)</p>", unsafe_allow_html=True)
+        st.markdown("<p class='section-title'>Score Breakdown (Top 8)</p>",
+                    unsafe_allow_html=True)
         fig_sc = go.Figure()
         components = [
             ("Peer Popularity (30%)", "pop_score",    "#4361ee", 0.30),
@@ -461,12 +504,11 @@ elif page == "🔮 Recommendations":
                 y=[round(r[col_nm] * wt, 3) for _, r in recs.iterrows()],
                 marker_color=clr
             ))
-        fig_sc.update_layout(**{
-            **PLOTLY_LAYOUT,
-            "barmode": "stack",
-            "height": 320,
-            "yaxis_title": "Weighted Score",
-        })
+        fig_sc.update_layout(**PLOTLY_LAYOUT, barmode="stack", height=320,
+                             yaxis_title="Weighted Score",
+                             xaxis=dict(gridcolor="#2a3350"),
+                             yaxis=dict(gridcolor="#2a3350"),
+                             margin=dict(l=30,r=20,t=40,b=30))
         st.plotly_chart(fig_sc, use_container_width=True)
 
 
@@ -803,7 +845,258 @@ elif page == "🔍 EDA & Analytics":
         }),
         use_container_width=True, hide_index=True
     )
+# ═══════════════════════════════════════════════
+# PAGE 7 — FEEDBACK ANALYTICS
+# ═══════════════════════════════════════════════
+
+elif page == "📣 Feedback Analytics":
+        st.markdown(
+            "<h1 style='color:#e8edf5'>📣 Feedback Analytics</h1>",
+            unsafe_allow_html=True
+        )
+        st.markdown(
+            "<p style='color:#8fa3bf;margin-bottom:20px'>"
+            "Recommendation approval rates, feedback trends, "
+            "and adaptive weight adjustment</p>",
+            unsafe_allow_html=True
+        )
     
-
-
-
+        from src.feedback import (
+            load_feedback, get_feedback_stats,
+            compute_feedback_weights
+        )
+        from src.utils import SCORE_WEIGHTS
+    
+        fb    = load_feedback()
+        stats = get_feedback_stats()
+    
+        if fb.empty:
+            st.info(
+                "No feedback collected yet.\n\n"
+                "Go to **🔮 Recommendations** page and click "
+                "👍 or 👎 on any course card to start collecting feedback."
+            )
+        else:
+            # ── KPIs ─────────────────────────────────
+            k1, k2, k3, k4 = st.columns(4)
+            k1.metric("Total Ratings",   stats['total'])
+            k2.metric("👍 Liked",        stats['liked'])
+            k3.metric("👎 Disliked",     stats['disliked'])
+            k4.metric("Approval Rate",   f"{stats['rate']}%")
+    
+            # Approval rate bar
+            approval_color = (
+                "#22c55e" if stats['rate'] >= 70
+                else "#f59e0b" if stats['rate'] >= 50
+                else "#f72585"
+            )
+            st.markdown(f"""
+            <div style='background:#1e2535;border-radius:10px;
+                        padding:14px 18px;margin:16px 0;
+                        border:1px solid #2a3350'>
+                <div style='display:flex;justify-content:space-between;
+                            margin-bottom:8px'>
+                    <span style='font-size:.85rem;color:#8fa3bf'>
+                        Overall Approval Rate
+                    </span>
+                    <span style='font-size:.85rem;font-weight:700;
+                                 color:{approval_color}'>
+                        {stats['rate']}%
+                    </span>
+                </div>
+                <div style='height:10px;background:#2a3350;border-radius:5px'>
+                    <div style='height:10px;width:{stats["rate"]}%;
+                                background:{approval_color};
+                                border-radius:5px'></div>
+                </div>
+                <div style='font-size:.72rem;color:#8fa3bf;margin-top:6px'>
+                    {'✅ Recommendations are well-received!' if stats['rate'] >= 70
+                     else '⚠️ Consider reviewing recommendation weights.'
+                     if stats['rate'] >= 50
+                     else '❌ Low approval — weights need adjustment.'}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+    
+            st.markdown("<br>", unsafe_allow_html=True)
+            col_a, col_b = st.columns(2)
+    
+            # ── Feedback Over Time ────────────────────
+            with col_a:
+                st.markdown(
+                    "<p class='section-title'>Feedback Over Time</p>",
+                    unsafe_allow_html=True
+                )
+                fb['Date'] = pd.to_datetime(fb['Timestamp']).dt.date
+                daily = (fb.groupby(['Date', 'Liked'])
+                           .size().reset_index(name='Count'))
+                daily['Reaction'] = daily['Liked'].map(
+                    {True: '👍 Liked', False: '👎 Disliked'}
+                )
+                fig_time = px.bar(
+                    daily, x='Date', y='Count', color='Reaction',
+                    color_discrete_map={
+                        '👍 Liked':    '#4361ee',
+                        '👎 Disliked': '#f72585'
+                    },
+                    barmode='group'
+                )
+                fig_time.update_layout(
+                    **PLOTLY_LAYOUT, height=300,
+                    xaxis=dict(gridcolor="#2a3350"),
+                    yaxis=dict(gridcolor="#2a3350"),
+                    margin=dict(l=30, r=20, t=40, b=30),
+                    legend=dict(bgcolor="rgba(0,0,0,0)")
+                )
+                st.plotly_chart(fig_time, use_container_width=True)
+    
+            # ── Most Liked Courses ────────────────────
+            with col_b:
+                st.markdown(
+                    "<p class='section-title'>Most Liked Courses</p>",
+                    unsafe_allow_html=True
+                )
+                liked_df = (fb[fb['Liked'] == True]
+                              .groupby('CourseID')
+                              .size().reset_index(name='Likes')
+                              .sort_values('Likes', ascending=False)
+                              .head(8))
+                if liked_df.empty:
+                    st.info("No liked courses yet.")
+                else:
+                    fig_liked = px.bar(
+                        liked_df, x='Likes', y='CourseID',
+                        orientation='h',
+                        color='Likes',
+                        color_continuous_scale='Blues'
+                    )
+                    fig_liked.update_layout(
+                        **PLOTLY_LAYOUT, height=300,
+                        coloraxis_showscale=False,
+                        yaxis=dict(gridcolor="#2a3350",
+                                   categoryorder="total ascending"),
+                        xaxis=dict(gridcolor="#2a3350"),
+                        margin=dict(l=30, r=20, t=40, b=30)
+                    )
+                    st.plotly_chart(fig_liked, use_container_width=True)
+    
+            # ── Per-User Feedback ─────────────────────
+            st.markdown("---")
+            st.markdown(
+                "<p class='section-title'>Feedback by Professional</p>",
+                unsafe_allow_html=True
+            )
+            user_fb = (fb.groupby(['UserID', 'Liked'])
+                         .size().unstack(fill_value=0)
+                         .reset_index())
+            if True in user_fb.columns:
+                user_fb = user_fb.rename(
+                    columns={True: 'Liked', False: 'Disliked'}
+                )
+            else:
+                user_fb['Liked']    = 0
+                user_fb['Disliked'] = 0
+    
+            user_fb['Approval'] = (
+                user_fb['Liked'] /
+                (user_fb['Liked'] + user_fb.get('Disliked', 0)).replace(0, 1)
+                * 100
+            ).round(1)
+    
+            st.dataframe(
+                user_fb.sort_values('Liked', ascending=False),
+                use_container_width=True, height=280
+            )
+    
+            # ── Adaptive Weights ──────────────────────
+            st.markdown("---")
+            st.markdown(
+                "<p class='section-title'>"
+                "🤖 Adaptive Recommendation Weights</p>",
+                unsafe_allow_html=True
+            )
+            adjusted = compute_feedback_weights(SCORE_WEIGHTS)
+    
+            st.markdown("""
+            <div class='insight-box'>
+            The system automatically adjusts recommendation scoring weights
+            based on user feedback. When approval rate drops below 50%,
+            the rating quality weight increases to prioritize
+            highly-rated courses.
+            </div>
+            """, unsafe_allow_html=True)
+    
+            w1, w2 = st.columns(2)
+            with w1:
+                st.markdown("**📊 Base Weights (original)**")
+                weight_names = {
+                    'popularity': '🔵 Peer Popularity',
+                    'category':   '🎯 Specialty Match',
+                    'level':      '📶 Level Fit',
+                    'rating':     '⭐ Rating Quality'
+                }
+                for k, v in SCORE_WEIGHTS.items():
+                    st.markdown(
+                        f"{weight_names.get(k, k)} → "
+                        f"**{v*100:.0f}%**"
+                    )
+    
+            with w2:
+                st.markdown("**🔄 Adjusted Weights (from feedback)**")
+                changed = False
+                for k, v in adjusted.items():
+                    diff = v - SCORE_WEIGHTS[k]
+                    if diff > 0:
+                        arrow = f"↑ +{diff*100:.0f}%"
+                        col   = "#4cc9f0"
+                        changed = True
+                    elif diff < 0:
+                        arrow = f"↓ {diff*100:.0f}%"
+                        col   = "#f72585"
+                        changed = True
+                    else:
+                        arrow = "unchanged"
+                        col   = "#8fa3bf"
+                    st.markdown(
+                        f"{weight_names.get(k, k)} → "
+                        f"**{v*100:.0f}%** "
+                        f"<span style='color:{col}'>{arrow}</span>",
+                        unsafe_allow_html=True
+                    )
+    
+            if changed:
+                st.success(
+                    f"✅ Weights adjusted based on {stats['total']} "
+                    f"feedback responses. Approval rate: {stats['rate']}%"
+                )
+            elif stats['total'] < 10:
+                st.info(
+                    f"Need at least 10 responses to trigger adjustment. "
+                    f"Current: {stats['total']}/10"
+                )
+            else:
+                st.success(
+                    "✅ Approval rate is healthy — base weights maintained."
+                )
+    
+            # ── Raw Feedback Log ──────────────────────
+            st.markdown("---")
+            st.markdown(
+                "<p class='section-title'>Raw Feedback Log</p>",
+                unsafe_allow_html=True
+            )
+            st.dataframe(
+                fb.sort_values('Timestamp', ascending=False)
+                  .reset_index(drop=True),
+                use_container_width=True, height=300
+            )
+    
+            # ── Export ────────────────────────────────
+            st.markdown("---")
+            csv_data = fb.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="⬇️ Download Feedback CSV",
+                data=csv_data,
+                file_name="edupro_feedback.csv",
+                mime="text/csv"
+            )
