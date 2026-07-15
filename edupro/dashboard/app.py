@@ -1100,3 +1100,196 @@ elif page == "📣 Feedback Analytics":
                 file_name="edupro_feedback.csv",
                 mime="text/csv"
             )
+            # ═══════════════════════════════════════════════
+            # PAGE 8 — USER MANAGEMENT (Admin Only)
+            # ═══════════════════════════════════════════════
+
+elif page == "👥 User Management":
+    if current_user['role'] != 'admin':
+        st.error("❌ Access denied. Admin only.")
+        st.stop()
+
+    st.markdown(
+        "<h1 style='color:#e8edf5'>👥 User Management</h1>",
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        "<p style='color:#8fa3bf;margin-bottom:20px'>"
+        "Manage dashboard users, roles, and login history</p>",
+        unsafe_allow_html=True
+    )
+
+    from src.auth import (
+        get_all_users, add_user,
+        change_password, load_login_log
+    )
+
+    tab1, tab2, tab3 = st.tabs(
+        ["👤 Current Users", "➕ Add User", "📋 Login History"]
+    )
+
+    # ── Tab 1: Current Users ──────────────────
+    with tab1:
+        st.markdown(
+            "<p class='section-title'>Registered Users</p>",
+            unsafe_allow_html=True
+        )
+        users_df = get_all_users()
+        st.dataframe(users_df, use_container_width=True)
+
+        st.markdown("---")
+        st.markdown(
+            "<p class='section-title'>Role Permissions</p>",
+            unsafe_allow_html=True
+        )
+        r1, r2, r3 = st.columns(3)
+        with r1:
+            st.markdown("""
+            <div class='card' style='border-color:#4361ee'>
+                <h3 style='color:#4361ee'>🔑 Admin</h3>
+                <p style='font-size:.8rem;color:#8fa3bf;margin-top:8px'>
+                Full access to all 8 pages including<br>
+                User Management and Feedback Analytics
+                </p>
+            </div>""", unsafe_allow_html=True)
+        with r2:
+            st.markdown("""
+            <div class='card' style='border-color:#f72585'>
+                <h3 style='color:#f72585'>👁️ Viewer</h3>
+                <p style='font-size:.8rem;color:#8fa3bf;margin-top:8px'>
+                Read-only access to all analytics<br>
+                pages but no Feedback or User Management
+                </p>
+            </div>""", unsafe_allow_html=True)
+        with r3:
+            st.markdown("""
+            <div class='card' style='border-color:#7209b7'>
+                <h3 style='color:#b57bee'>🎓 Learner</h3>
+                <p style='font-size:.8rem;color:#8fa3bf;margin-top:8px'>
+                Access only to Professional Explorer<br>
+                and Recommendations pages
+                </p>
+            </div>""", unsafe_allow_html=True)
+
+    # ── Tab 2: Add User ───────────────────────
+    with tab2:
+        st.markdown(
+            "<p class='section-title'>Add New User</p>",
+            unsafe_allow_html=True
+        )
+        with st.form("add_user_form"):
+            c1, c2 = st.columns(2)
+            with c1:
+                new_username = st.text_input("Username")
+                new_name     = st.text_input("Full Name")
+                new_role     = st.selectbox(
+                    "Role", ["viewer","learner","admin"]
+                )
+            with c2:
+                new_email    = st.text_input("Email")
+                new_password = st.text_input(
+                    "Password", type="password"
+                )
+                new_password2 = st.text_input(
+                    "Confirm Password", type="password"
+                )
+
+            if st.form_submit_button("➕ Create User",
+                                     use_container_width=True):
+                if not all([new_username, new_name,
+                            new_email, new_password]):
+                    st.error("All fields are required.")
+                elif new_password != new_password2:
+                    st.error("Passwords do not match.")
+                elif len(new_password) < 6:
+                    st.error("Password must be at least 6 characters.")
+                else:
+                    success = add_user(
+                        new_username, new_password,
+                        new_role, new_name, new_email
+                    )
+                    if success:
+                        st.success(
+                            f"✅ User '{new_username}' created "
+                            f"with role '{new_role}'"
+                        )
+                    else:
+                        st.error(
+                            f"Username '{new_username}' already exists."
+                        )
+
+        st.markdown("---")
+        st.markdown(
+            "<p class='section-title'>Change Password</p>",
+            unsafe_allow_html=True
+        )
+        with st.form("change_pw_form"):
+            cp_user    = st.text_input("Username")
+            cp_old     = st.text_input("Current Password",
+                                        type="password")
+            cp_new     = st.text_input("New Password",
+                                        type="password")
+            cp_confirm = st.text_input("Confirm New Password",
+                                        type="password")
+
+            if st.form_submit_button("🔑 Change Password",
+                                      use_container_width=True):
+                if cp_new != cp_confirm:
+                    st.error("New passwords do not match.")
+                elif len(cp_new) < 6:
+                    st.error("New password must be 6+ characters.")
+                else:
+                    ok = change_password(cp_user, cp_old, cp_new)
+                    if ok:
+                        st.success("✅ Password changed successfully.")
+                    else:
+                        st.error(
+                            "❌ Failed. Check username and "
+                            "current password."
+                        )
+
+    # ── Tab 3: Login History ──────────────────
+    with tab3:
+        st.markdown(
+            "<p class='section-title'>Login History</p>",
+            unsafe_allow_html=True
+        )
+        log = load_login_log()
+        if log.empty:
+            st.info("No login history yet.")
+        else:
+            success_rate = log['Success'].mean() * 100
+            l1, l2, l3 = st.columns(3)
+            l1.metric("Total Attempts", len(log))
+            l2.metric("Successful",
+                      int(log['Success'].sum()))
+            l3.metric("Success Rate",
+                      f"{success_rate:.1f}%")
+
+            st.markdown("<br>", unsafe_allow_html=True)
+            fig_log = px.bar(
+                log.groupby(['Username', 'Success'])
+                   .size().reset_index(name='Count'),
+                x='Username', y='Count', color='Success',
+                color_discrete_map={
+                    True:  '#4361ee',
+                    False: '#f72585'
+                },
+                barmode='group',
+                title='Login Attempts by User'
+            )
+            fig_log.update_layout(
+                **PLOTLY_LAYOUT, height=300,
+                xaxis=dict(gridcolor="#2a3350"),
+                yaxis=dict(gridcolor="#2a3350"),
+                margin=dict(l=30, r=20, t=40, b=30)
+            )
+            st.plotly_chart(fig_log,
+                            use_container_width=True)
+
+            st.dataframe(
+                log.sort_values('Timestamp',
+                                ascending=False),
+                use_container_width=True,
+                height=300
+            )

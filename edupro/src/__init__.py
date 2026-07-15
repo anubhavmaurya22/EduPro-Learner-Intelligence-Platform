@@ -26,3 +26,6 @@ from .feedback import (
     get_feedback_stats, get_liked_courses,
     get_disliked_courses, compute_feedback_weights
 )
+
+
+from .auth import authenticate, get_allowed_pages, add_user, change_password, get_all_users, load_login_log
